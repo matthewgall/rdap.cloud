@@ -1,5 +1,6 @@
 const Router = require('./router')
 const validator = require('validator');
+const tldextract = require('parse-domain');
 
 const headers = {
     headers: {
@@ -63,7 +64,9 @@ async function api(request) {
             resp['results'][i]['type'] = 'ip'
         }
         if (validator.isFQDN(i)) {
+            let tld = tldextract(`http://${i}`)
             resp['results'][i]['type'] = 'domain'
+            resp['results'][i]['tld'] = tld['tld']
         }
         if (validator.isNumeric(i)) {
             resp['results'][i]['type'] = 'asn'

@@ -13,8 +13,8 @@
         "prettier": "^1.17.0"
     },
     "dependencies": {
+        "parse-domain": "^2.3.4",
         "serverless-cloudflare-workers": "^1.2.0",
-        "tldextract": "0.0.5",
         "validator": "^12.2.0"
     }
 }
