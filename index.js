@@ -1,6 +1,7 @@
 const Router = require('./router')
 const validator = require('validator');
 const tldextract = require('parse-domain');
+const cidr = require('ip-cidr')
 
 const headers = {
     headers: {
@@ -18,7 +19,27 @@ addEventListener('fetch', event => {
     event.respondWith(handleRequest(event.request))
 })
 
-async function services(request) {
+async function getRDAP(server, stype, subject) {
+    let cached = await KV.get(`rdap.${subject}`, 'json')
+    let resp = {}
+
+    if (cached !== null) {
+        resp = cached
+    } else {
+        let d = await fetch(`${server}${stype}/${subject}`, {
+            headers: {
+                'Accept': 'application/rdap+json'
+            }
+        })
+        resp = await d.json()
+    }
+
+    await KV.put(`rdap.${subject}`, JSON.stringify(resp), { expirationTtl: TTL * 2 })
+
+    return resp
+}
+
+async function getIANA() {
     let resp = {}
     let cached = await KV.get('services', 'json')
 
@@ -38,10 +59,15 @@ async function services(request) {
             }
         }
 
-        await KV.put('services', JSON.stringify(resp), { expirationTtl: 604800 })
+        await KV.put('services', JSON.stringify(resp), { expirationTtl: TTL * 10 })
     }
 
-    return new Response(JSON.stringify(resp), headers)
+    return resp
+}
+
+async function services(request) {
+    let data = await getIANA()
+    return new Response(JSON.stringify(data), headers)
 }
 
 async function api(request) {
@@ -53,23 +79,70 @@ async function api(request) {
 
     for (let i of target.split(',')) {
         i = i.trim()
-        let t = false
 
         resp['results'][i] = {
             'success': true,
-            'type': ''
+            'type': '',
+            'metadata': {}
         }
 
         if (validator.isIP(i)) {
             resp['results'][i]['type'] = 'ip'
+
+            let servers = await getIANA()
+            let classes = ['ipv4', 'ipv6']
+            for (let t of classes) {
+                for (let r in servers[t]) {
+                    let d = new cidr(r)
+                    if (d.contains(i)) {
+                        resp['results'][i]['metadata']['server'] = servers[t][r]
+                    }
+                }
+            }
+            let res = {}
+            try {
+                res = await getRDAP(resp['results'][i]['metadata']['server'], 'ip', `${i}/32`)
+            } catch (err) {}
+
+            resp['results'][i]['data'] = res
         }
+
         if (validator.isFQDN(i)) {
             let tld = tldextract(`http://${i}`)
             resp['results'][i]['type'] = 'domain'
-            resp['results'][i]['tld'] = tld['tld']
+            resp['results'][i]['metadata'] = tld
+
+            let servers = await getIANA()
+            try {
+                resp['results'][i]['metadata']['server'] = servers['domains'][tld['tld']]
+            } catch (err) {}
+
+            let res = {}
+            try {
+                res = await getRDAP(resp['results'][i]['metadata']['server'], resp['results'][i]['type'], i)
+            } catch (err) {}
+
+            resp['results'][i]['data'] = res
         }
         if (validator.isNumeric(i)) {
             resp['results'][i]['type'] = 'asn'
+
+            let servers = await getIANA()
+            try {
+                for (let r in servers['asn']) {
+                    let ra = r.split('-')
+                    if (i >= ra[0] && i <= ra[1]) {
+                        resp['results'][i]['metadata']['server'] = servers['asn'][r]
+                    }
+                }
+            } catch (err) {}
+
+            let res = {}
+            try {
+                res = await getRDAP(resp['results'][i]['metadata']['server'], 'autnum', i)
+            } catch (err) {}
+
+            resp['results'][i]['data'] = res
         }
 
         if (resp['results'][i]['type'] == '') {
@@ -79,6 +152,8 @@ async function api(request) {
             resp['results'][i]['success'] = false
             resp['results'][i]['message'] = "The data you provided does not appear to be a valid type (IP, domain name or ASN)"
         }
+
+        delete resp['results'][i]['metadata']
     }
 
     return new Response(JSON.stringify(resp, null, 2), headers)
