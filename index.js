@@ -49,7 +49,9 @@ async function getRDAP(server, stype, subject) {
         resp = await d.json()
     }
 
-    await KV.put(`rdap.${subject}`, JSON.stringify(resp), { expirationTtl: TTL * 2 })
+    await KV.put(`rdap.${subject}`, JSON.stringify(resp), {
+        expirationTtl: TTL * 2
+    })
 
     return resp
 }
@@ -74,7 +76,9 @@ async function getIANA() {
             }
         }
 
-        await KV.put('services', JSON.stringify(resp), { expirationTtl: TTL * 10 })
+        await KV.put('services', JSON.stringify(resp), {
+            expirationTtl: TTL * 10
+        })
     }
 
     return resp
@@ -130,7 +134,13 @@ async function api(request) {
             let servers = await getIANA()
             try {
                 resp['results'][i]['metadata']['server'] = servers['domains'][tld['tld']]
-            } catch (err) {}
+            } catch (err) {
+                delete resp['results'][i]['type']
+
+                resp['success'] = false
+                resp['results'][i]['success'] = false
+                resp['results'][i]['message'] = "The TLD provided is not supported by RDAP. Note that ccTLDsare exempt from requirements to operate RDAP servers"
+            }
 
             let res = {}
             try {
@@ -183,4 +193,9 @@ async function handleRequest(request) {
 
     const resp = await r.route(request)
     return resp
+}
+r.get('/', () => new Response('Welcome to rdap.cloud'))
+
+const resp = await r.route(request)
+return resp
 }
