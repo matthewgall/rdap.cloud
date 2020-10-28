@@ -194,8 +194,3 @@ async function handleRequest(request) {
     const resp = await r.route(request)
     return resp
 }
-r.get('/', () => new Response('Welcome to rdap.cloud'))
-
-const resp = await r.route(request)
-return resp
-}
