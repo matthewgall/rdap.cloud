@@ -40,7 +40,7 @@ async function api(request) {
 
         let cached = await KV.get(`rdap-${i}`, 'json')
         if (cached !== null) {
-            return cached
+            resp = cached
         } else {
             l = new Lookup(i)
             lType = await l.getType()
