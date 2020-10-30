@@ -78,7 +78,7 @@ async function api(request) {
                 continue
             }
 
-            KV.put(`rdap-${i}`, JSON.stringify(resp[i]), {
+            await KV.put(`rdap-${i}`, JSON.stringify(resp[i]), {
                 expirationTtl: TTL * 10
             })
         }
