@@ -4,7 +4,7 @@ zone_id = "cd01ce76c2bae999426e28366a336f21"
 name = "rdapcloud-dev"
 route = "dev.rdap.cloud/*"
 vars = { TTL = 180 }
-kv_namespaces = [{binding = "KV", id = "68ca735dabe843f89e1486416b4ba7fe", preview_id = "68ca735dabe843f89e1486416b4ba7fe"}]
+kv_namespaces = [{binding = "KV", id = "68ca735dabe843f89e1486416b4ba7fe"}]
 webpack_config = "webpack.config.js"
 
 [env.staging]
