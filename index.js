@@ -40,7 +40,7 @@ async function api(request) {
 
         let cached = await KV.get(`rdap-${i}`, 'json')
         if (cached !== null) {
-            resp = cached
+            resp['results'][i] = cached
         } else {
             l = new Lookup(i)
             lType = await l.getType()
@@ -78,8 +78,8 @@ async function api(request) {
                 continue
             }
 
-            await KV.put(`rdap-${i}`, JSON.stringify(resp[i]), {
-                expirationTtl: TTL * 10
+            await KV.put(`rdap-${i}`, JSON.stringify(resp['results'][i]), {
+                expirationTtl: TTL
             })
         }
     }
