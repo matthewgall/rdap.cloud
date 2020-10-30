@@ -14,173 +14,65 @@
    limitations under the License. 
 */
 const Router = require('./router')
-const validator = require('validator');
-const tldextract = require('parse-domain');
-const cidr = require('ip-cidr')
+const Lookup = require('./modules/lookup')
+const Rdap = require('./modules/rdap')
 
 const headers = {
     headers: {
         'Content-Type': 'application/json'
     }
 }
-const iana = {
-    'asn': 'https://data.iana.org/rdap/asn.json',
-    'domains': 'https://data.iana.org/rdap/dns.json',
-    'ipv4': 'https://data.iana.org/rdap/ipv4.json',
-    'ipv6': 'https://data.iana.org/rdap/ipv6.json'
-}
-
-addEventListener('fetch', event => {
-    event.respondWith(handleRequest(event.request))
-})
-
-async function getRDAP(server, stype, subject) {
-    let cached = await KV.get(`rdap.${subject}`, 'json')
-    let resp = {}
-
-    if (cached !== null) {
-        resp = cached
-    } else {
-        let d = await fetch(`${server}${stype}/${subject}`, {
-            headers: {
-                'Accept': 'application/rdap+json'
-            }
-        })
-        resp = await d.json()
-    }
-
-    await KV.put(`rdap.${subject}`, JSON.stringify(resp), {
-        expirationTtl: TTL * 2
-    })
-
-    return resp
-}
-
-async function getIANA() {
-    let resp = {}
-    let cached = await KV.get('services', 'json')
-
-    if (cached !== null) {
-        resp = cached
-    } else {
-        for (let l in iana) {
-            resp[l] = {}
-
-            let d = await fetch(iana[l])
-            d = await d.json()
-
-            for (let p of d['services']) {
-                for (let name of p[0]) {
-                    resp[l][name] = p[1][0]
-                }
-            }
-        }
-
-        await KV.put('services', JSON.stringify(resp), {
-            expirationTtl: TTL * 10
-        })
-    }
-
-    return resp
-}
 
 async function services(request) {
-    let data = await getIANA()
-    return new Response(JSON.stringify(data), headers)
+    let rdap = new Rdap()
+    let data = await rdap.getServices()
+    return new Response(JSON.stringify(data, null, 2), headers)
 }
 
 async function api(request) {
     let target = new URL(request.url).pathname.replace('/api/v1/', '')
     let resp = {
-        'success': true,
         'results': {}
     }
 
     for (let i of target.split(',')) {
         i = i.trim()
+        l = new Lookup(i)
+        lType = await l.getType()
 
         resp['results'][i] = {
             'success': true,
-            'type': '',
-            'metadata': {}
+            'type': lType,
+            'server': l.server
         }
 
-        if (validator.isIP(i)) {
-            resp['results'][i]['type'] = 'ip'
-
-            let servers = await getIANA()
-            let classes = ['ipv4', 'ipv6']
-            for (let t of classes) {
-                for (let r in servers[t]) {
-                    let d = new cidr(r)
-                    if (d.contains(i)) {
-                        resp['results'][i]['metadata']['server'] = servers[t][r]
-                    }
-                }
-            }
-            let res = {}
-            try {
-                res = await getRDAP(resp['results'][i]['metadata']['server'], 'ip', `${i}/32`)
-            } catch (err) {}
-
-            resp['results'][i]['data'] = res
+        if (l.server !== "") {
+            let d = await l.getData()
+            resp['results'][i]['data'] = d
         }
 
-        if (validator.isFQDN(i)) {
-            let tld = tldextract(`http://${i}`)
-            resp['results'][i]['type'] = 'domain'
-            resp['results'][i]['metadata'] = tld
-
-            let servers = await getIANA()
-            try {
-                resp['results'][i]['metadata']['server'] = servers['domains'][tld['tld']]
-            } catch (err) {
-                delete resp['results'][i]['type']
-
-                resp['success'] = false
-                resp['results'][i]['success'] = false
-                resp['results'][i]['message'] = "The TLD provided is not supported by RDAP. Note that ccTLDsare exempt from requirements to operate RDAP servers"
-            }
-
-            let res = {}
-            try {
-                res = await getRDAP(resp['results'][i]['metadata']['server'], resp['results'][i]['type'], i)
-            } catch (err) {}
-
-            resp['results'][i]['data'] = res
-        }
-        if (validator.isNumeric(i)) {
-            resp['results'][i]['type'] = 'asn'
-
-            let servers = await getIANA()
-            try {
-                for (let r in servers['asn']) {
-                    let ra = r.split('-')
-                    if (i >= ra[0] && i <= ra[1]) {
-                        resp['results'][i]['metadata']['server'] = servers['asn'][r]
-                    }
-                }
-            } catch (err) {}
-
-            let res = {}
-            try {
-                res = await getRDAP(resp['results'][i]['metadata']['server'], 'autnum', i)
-            } catch (err) {}
-
-            resp['results'][i]['data'] = res
-        }
-
-        if (resp['results'][i]['type'] == '') {
+        if (resp['results'][i]['type'] == "invalid") {
             delete resp['results'][i]['type']
-
-            resp['success'] = false
+            delete resp['results'][i]['server']
             resp['results'][i]['success'] = false
-            resp['results'][i]['message'] = "The data you provided does not appear to be a valid type (IP, domain name or ASN)"
+            resp['results'][i]['message'] = `${i} does not appear to be a valid domain name, IP address or ASN`
+            continue
         }
-
-        delete resp['results'][i]['metadata']
+        if (resp['results'][i]['type'] == "invalid-domain") {
+            delete resp['results'][i]['type']
+            delete resp['results'][i]['server']
+            resp['results'][i]['success'] = false
+            resp['results'][i]['message'] = `${i} does not appear to be a valid domain name`
+            continue
+        }
+        if (resp['results'][i]['type'] == "unsupported-domain") {
+            delete resp['results'][i]['type']
+            delete resp['results'][i]['server']
+            resp['results'][i]['success'] = false
+            resp['results'][i]['message'] = `${i} is not supported by RDAP.This may be because the domain belongs to a ccTLD, or the gTLD has not deployed RDAP`
+            continue
+        }
     }
-
     return new Response(JSON.stringify(resp, null, 2), headers)
 }
 
@@ -194,3 +86,7 @@ async function handleRequest(request) {
     const resp = await r.route(request)
     return resp
 }
+
+addEventListener('fetch', event => {
+    event.respondWith(handleRequest(event.request))
+})
