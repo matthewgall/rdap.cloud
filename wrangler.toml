@@ -12,9 +12,11 @@ name = "rdapcloud-staging"
 route = "staging.rdap.cloud/*"
 vars = { TTL = 180 }
 kv_namespaces = [{binding = "KV", id = "d45c32c61eaf498c9196d7f18b9d136d"}]
+webpack_config = "webpack.config.js"
 
 [env.prod]
 name = "rdapcloud-prod"
 route = "rdap.cloud/*"
 vars = { TTL = 604800 }
 kv_namespaces = [{binding = "KV", id = "06db767175f4455a93b621a4106e4246"}]
+webpack_config = "webpack.config.js"
