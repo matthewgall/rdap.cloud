@@ -145,6 +145,7 @@ async function handleRequest(request) {
 
     r.get('/api/v1/services', () => services(request))
     r.get('/api/v1/.*', () => api(request))
+    r.get('/metrics', () => metrics(request))
     r.get('/', () => new Response('Welcome to rdap.cloud'))
 
     const resp = await r.route(request)
