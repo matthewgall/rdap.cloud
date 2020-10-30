@@ -37,42 +37,53 @@ async function api(request) {
 
     for (let i of target.split(',')) {
         i = i.trim()
-        l = new Lookup(i)
-        lType = await l.getType()
 
-        resp['results'][i] = {
-            'success': true,
-            'type': lType,
-            'server': l.server
-        }
+        let cached = await KV.get(`rdap-${i}`, 'json')
+        if (cached !== null) {
+            return cached
+        } else {
+            l = new Lookup(i)
+            lType = await l.getType()
 
-        if (l.server !== "") {
-            let d = await l.getData()
-            resp['results'][i]['data'] = d
-        }
+            resp['results'][i] = {
+                'success': true,
+                'type': lType,
+                'server': l.server
+            }
 
-        if (resp['results'][i]['type'] == "invalid") {
-            delete resp['results'][i]['type']
-            delete resp['results'][i]['server']
-            resp['results'][i]['success'] = false
-            resp['results'][i]['message'] = `${i} does not appear to be a valid domain name, IP address or ASN`
-            continue
-        }
-        if (resp['results'][i]['type'] == "invalid-domain") {
-            delete resp['results'][i]['type']
-            delete resp['results'][i]['server']
-            resp['results'][i]['success'] = false
-            resp['results'][i]['message'] = `${i} does not appear to be a valid domain name`
-            continue
-        }
-        if (resp['results'][i]['type'] == "unsupported-domain") {
-            delete resp['results'][i]['type']
-            delete resp['results'][i]['server']
-            resp['results'][i]['success'] = false
-            resp['results'][i]['message'] = `${i} is not supported by RDAP.This may be because the domain belongs to a ccTLD, or the gTLD has not deployed RDAP`
-            continue
+            if (l.server !== "") {
+                let d = await l.getData()
+                resp['results'][i]['data'] = d
+            }
+
+            if (resp['results'][i]['type'] == "invalid") {
+                delete resp['results'][i]['type']
+                delete resp['results'][i]['server']
+                resp['results'][i]['success'] = false
+                resp['results'][i]['message'] = `${i} does not appear to be a valid domain name, IP address or ASN`
+                continue
+            }
+            if (resp['results'][i]['type'] == "invalid-domain") {
+                delete resp['results'][i]['type']
+                delete resp['results'][i]['server']
+                resp['results'][i]['success'] = false
+                resp['results'][i]['message'] = `${i} does not appear to be a valid domain name`
+                continue
+            }
+            if (resp['results'][i]['type'] == "unsupported-domain") {
+                delete resp['results'][i]['type']
+                delete resp['results'][i]['server']
+                resp['results'][i]['success'] = false
+                resp['results'][i]['message'] = `${i} is not supported by RDAP.This may be because the domain belongs to a ccTLD, or the gTLD has not deployed RDAP`
+                continue
+            }
+
+            KV.put(`rdap-${i}`, JSON.stringify(resp[i]), {
+                expirationTtl: TTL * 10
+            })
         }
     }
+
     return new Response(JSON.stringify(resp, null, 2), headers)
 }
 
