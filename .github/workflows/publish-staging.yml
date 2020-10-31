@@ -2,9 +2,8 @@ name: publish
 on:
   workflow_dispatch:
   repository_dispatch:
-  push:
-    branches:
-      - staging
+  schedule:
+    - cron: '14 */4 * * *'
 jobs:
   deploy:
     runs-on: ubuntu-latest
