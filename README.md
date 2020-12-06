@@ -9,10 +9,11 @@ rdap.cloud is powered by [Cloudflare Workers](https://workers.dev), a paid for s
 
 ## API
 ## /api/v1/[subject]
-Performs a lookup for the subject. Supported subjects are:
-    * IP addresses (v4 / v6)
-    * Domains
-    * AS Numbers
+Performs a lookup for the subject. Supported subjects are:  
+    
+* IP addresses (v4 / v6)  
+* Domains  
+* AS Numbers  
 
 ## Licence
 Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
