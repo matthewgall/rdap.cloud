@@ -19,7 +19,10 @@ const Rdap = require('./modules/rdap')
 
 const headers = {
     headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, PUT, POST, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Origin, Accept, Content-Type, X-Requested-With, X-CSRF-Token, cf-access-client-id, cf-access-client-secret'
     }
 }
 
