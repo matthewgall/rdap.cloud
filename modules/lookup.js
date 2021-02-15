@@ -1,6 +1,6 @@
 const validator = require('validator');
-const parsedomain = require('parse-domain');
-const cidr = require('ip-cidr')
+const tldextract = require('tld-extract');
+const cidr = require('ip-cidr-webpack')
 const Rdap = require('./rdap')
 
 class Lookup {
@@ -48,27 +48,25 @@ class Lookup {
         }
 
         if (validator.isFQDN(this.target)) {
-            let parseRes = parsedomain.parseDomain(this.target)
-            if (parseRes.type == parsedomain.ParseResultType.Listed) {
-                parseRes = parseRes.icann
-
+            try {
+                let parseRes = tldextract(`http://${this.target}`)
                 this.metadata = {
-                    'subdomains': parseRes.subDomains,
+                    'subdomains': parseRes.sub,
                     'domain': parseRes.domain,
-                    'tld': parseRes.topLevelDomains[0]
+                    'tld': parseRes.tld
                 }
 
                 let rd = new Rdap()
                 rd = await rd.getServices()
 
-                if (rd['domains'][parseRes.topLevelDomains[0]]) {
-                    this.server = rd['domains'][parseRes.topLevelDomains[0]]
+                if (rd['domains'][this.metadata['tld']]) {
+                    this.server = rd['domains'][this.metadata['tld']]
                     this.type = "domain"
                 } else {
                     this.type = "unsupported-domain"
                 }
-
-            } else {
+            }
+            catch(e) {
                 this.type = "invalid-domain"
             }
         }

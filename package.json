@@ -13,9 +13,9 @@
         "prettier": "^2.1.2"
     },
     "dependencies": {
-        "ip-cidr": "^2.1.1",
-        "parse-domain": "^3.0.3",
+        "ip-cidr-webpack": "^1.2.7",
         "serverless-cloudflare-workers": "^1.2.0",
-        "validator": "^13.1.17"
+        "tld-extract": "^2.0.0",
+        "validator": "^13.5.2"
     }
 }
