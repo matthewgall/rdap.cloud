@@ -4,19 +4,19 @@ zone_id = "cd01ce76c2bae999426e28366a336f21"
 name = "rdapcloud-dev"
 route = "dev.rdap.cloud/*"
 vars = { TTL = 180 }
-kv_namespaces = [{binding = "KV", id = "68ca735dabe843f89e1486416b4ba7fe"}]
+kv_namespaces = [{binding = "KV", id = "11bf567208e64657a11fdeb150d2b8b9"}]
 webpack_config = "webpack.config.js"
 
 [env.staging]
 name = "rdapcloud-staging"
 route = "staging.rdap.cloud/*"
 vars = { TTL = 180 }
-kv_namespaces = [{binding = "KV", id = "d45c32c61eaf498c9196d7f18b9d136d"}]
+kv_namespaces = [{binding = "KV", id = "11bf567208e64657a11fdeb150d2b8b9"}]
 webpack_config = "webpack.config.js"
 
 [env.prod]
 name = "rdapcloud-prod"
 route = "rdap.cloud/*"
 vars = { TTL = 604800 }
-kv_namespaces = [{binding = "KV", id = "a904ce0083f147669df626e1f2e8acae"}]
+kv_namespaces = [{binding = "KV", id = "11bf567208e64657a11fdeb150d2b8b9"}]
 webpack_config = "webpack.config.js"
