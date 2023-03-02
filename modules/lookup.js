@@ -61,6 +61,7 @@ class Lookup {
 
                 if (rd['domains'][this.metadata['tld']]) {
                     this.server = rd['domains'][this.metadata['tld']]
+                    this.target = this.metadata['domain']
                     this.type = "domain"
                 } else {
                     this.type = "unsupported-domain"
