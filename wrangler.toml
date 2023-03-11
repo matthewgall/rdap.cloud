@@ -1,22 +1,20 @@
-type = "webpack"
 account_id = "b0d7b9f87b57470ef508f1a511093cae"
-zone_id = "cd01ce76c2bae999426e28366a336f21"
 name = "rdapcloud-dev"
 route = "dev.rdap.cloud/*"
 vars = { TTL = 180 }
 kv_namespaces = [{binding = "KV", id = "11bf567208e64657a11fdeb150d2b8b9"}]
-webpack_config = "webpack.config.js"
+main = "index.js"
+compatibility_date = "2023-03-11"
+node_compat = true
 
 [env.staging]
 name = "rdapcloud-staging"
 route = "staging.rdap.cloud/*"
 vars = { TTL = 180 }
 kv_namespaces = [{binding = "KV", id = "11bf567208e64657a11fdeb150d2b8b9"}]
-webpack_config = "webpack.config.js"
 
 [env.prod]
 name = "rdapcloud-prod"
 route = "rdap.cloud/*"
 vars = { TTL = 604800 }
 kv_namespaces = [{binding = "KV", id = "11bf567208e64657a11fdeb150d2b8b9"}]
-webpack_config = "webpack.config.js"

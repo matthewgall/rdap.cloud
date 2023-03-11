@@ -10,11 +10,12 @@
     "author": "Matthew Gall <git@matthewgall.com>",
     "license": "ISC",
     "devDependencies": {
-        "prettier": "^2.8.4"
+        "prettier": "^2.8.4",
+        "wrangler": "^2.12.2"
     },
     "dependencies": {
-        "ip-cidr-webpack": "^1.2.7",
-        "serverless-cloudflare-workers": "^1.2.0",
+        "ip-cidr-webpack": "^1.2.1",
+        "itty-router": "^3.0.11",
         "tld-extract": "^2.1.0",
         "validator": "^13.9.0"
     }
