@@ -11,8 +11,11 @@ jobs:
     name: Deploy
     steps:
       - uses: actions/checkout@v2
-      - name: Publish
+      - name: Setup nodejs
+        uses: actions/setup-node@v3
+      - name: Install dependencies
+        uses: jaid/action-npm-install@v1.2.4
+      - name: Publish to Cloudflare
         uses: cloudflare/wrangler-action@2.0.0
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
-          environment: prod
