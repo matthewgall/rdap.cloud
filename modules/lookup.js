@@ -1,7 +1,7 @@
 const validator = require('validator');
 const tldextract = require('tld-extract');
-const Cidr = require('ip-cidr-webpack')
-const Rdap = require('./rdap')
+import {contains} from 'cidr-tools';
+import Rdap from './rdap'
 class Lookup {
     constructor(target) {
         this.target = target
@@ -32,10 +32,7 @@ class Lookup {
 
             for (let t of classes) {
                 for (let r in rd[t]) {
-                    let d = new Cidr.CIDR(r)
-                    d = d.toArray()
-
-                    if (d.includes(this.target)) {
+                    if (contains(r, this.target)) {
                         this.server = rd[t][r]
                     }
                 }
