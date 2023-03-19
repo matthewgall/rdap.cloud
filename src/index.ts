@@ -92,7 +92,7 @@ router.get('/api/v1/services', async (request, env, context) => {
 });
 
 router.get('/api/v1/*', async (request, env, context) => {
-    let target = new URL(request.url).pathname.replace('/api/v1/', '')
+    let target = decodeURIComponent(new URL(request.url).pathname.replace('/api/v1/', ''))
     let resp = {
         'results': {}
     }
