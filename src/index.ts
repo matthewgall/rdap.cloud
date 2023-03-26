@@ -136,7 +136,7 @@ router.get('/api/v1/*', async (request, env, context) => {
                 delete resp['results'][i]['type']
                 delete resp['results'][i]['server']
                 resp['results'][i]['success'] = false
-                resp['results'][i]['message'] = `${i} is not supported by RDAP.This may be because the domain belongs to a ccTLD, or the gTLD has not deployed RDAP`
+                resp['results'][i]['message'] = `${i} is not supported by RDAP. This may be because the domain belongs to a ccTLD, or the gTLD has not deployed RDAP`
                 continue
             }
 
