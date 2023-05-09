@@ -115,7 +115,16 @@ router.get('/api/v1/*', async (request, env, context) => {
 
             if (l.server !== "") {
                 let d = await l.getData()
-                resp['results'][i]['data'] = d
+                if (d === null) {
+                    delete resp['results'][i]['type']
+                    delete resp['results'][i]['server']
+                    resp['results'][i]['success'] = false
+                    resp['results'][i]['message'] = `${i} does not appear to be a registered domain name, IP address or ASN`
+                    continue
+                }
+                else {
+                    resp['results'][i]['data'] = d
+                }
             }
 
             if (resp['results'][i]['type'] == "invalid") {

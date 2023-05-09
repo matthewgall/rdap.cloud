@@ -19,7 +19,13 @@ class Lookup {
                 cacheEverything: true
             }
         })
-        req = await req.json()
+
+        if (req.ok) {
+            req = await req.json()
+        }
+        else {
+            req = null;
+        }
         return req
     }
 
