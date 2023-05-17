@@ -7,8 +7,14 @@
         "test": "echo \"Error: no test specified\" && exit 1",
         "format": "prettier --write '**/*.{js,css,json,md}'"
     },
-    "author": "Matthew Gall <git@matthewgall.com>",
-    "license": "ISC",
+    "author": "Matthew Gall <me@matthewgall.dev>",
+    "license": "Apache-2.0",
+    "licenses": [
+        {
+        "type": "Apache-2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0"
+        }
+    ],
     "devDependencies": {
         "prettier": "^2.8.8",
         "wrangler": "^3.0.0"
