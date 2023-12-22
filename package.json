@@ -11,18 +11,18 @@
     "license": "Apache-2.0",
     "licenses": [
         {
-        "type": "Apache-2.0",
-        "url": "http://www.apache.org/licenses/LICENSE-2.0"
+            "type": "Apache-2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0"
         }
     ],
     "devDependencies": {
-        "prettier": "^2.8.8",
-        "wrangler": "^3.0.0"
+        "prettier": "^3.1.1",
+        "wrangler": "^3.22.1"
     },
     "dependencies": {
-        "cidr-tools": "^5.1.5",
-        "itty-router": "^3.0.12",
+        "cidr-tools": "^7.0.4",
+        "itty-router": "^4.0.24",
         "tld-extract": "^2.1.0",
-        "validator": "^13.9.0"
+        "validator": "^13.11.0"
     }
 }
