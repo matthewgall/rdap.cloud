@@ -13,10 +13,11 @@
    See the License for the specific language governing permissions and
    limitations under the License. 
 */
+
 import { Router } from 'itty-router';
 import Lookup from '../modules/lookup';
 import Rdap from '../modules/rdap';
-import Package from '../package.json';
+import Package from '../package-lock.json';
 
 const router = Router();
 const headers = {
