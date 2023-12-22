@@ -116,7 +116,7 @@ router.get('/api/v1/*', async (request, env, context) => {
 
             if (l.server !== "") {
                 let d = await l.getData()
-                if (d === null) {
+                if (d === null || d === "") {
                     delete resp['results'][i]['type']
                     delete resp['results'][i]['server']
                     resp['results'][i]['success'] = false
@@ -128,18 +128,11 @@ router.get('/api/v1/*', async (request, env, context) => {
                 }
             }
 
-            if (resp['results'][i]['type'] == "invalid") {
+            if (['invalid', 'invalid-domain', 'invalid-ip'].includes(resp['results'][i]['type'])) {
                 delete resp['results'][i]['type']
                 delete resp['results'][i]['server']
                 resp['results'][i]['success'] = false
                 resp['results'][i]['message'] = `${i} does not appear to be a valid domain name, IP address or ASN`
-                continue
-            }
-            if (resp['results'][i]['type'] == "invalid-domain") {
-                delete resp['results'][i]['type']
-                delete resp['results'][i]['server']
-                resp['results'][i]['success'] = false
-                resp['results'][i]['message'] = `${i} does not appear to be a valid domain name`
                 continue
             }
             if (resp['results'][i]['type'] == "unsupported-domain") {
