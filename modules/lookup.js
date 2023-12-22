@@ -2,7 +2,7 @@ const validator = require('validator');
 const tldextract = require('tld-extract');
 import {contains} from 'cidr-tools';
 import Rdap from './rdap'
-export default class Lookup {
+class Lookup {
     constructor(target) {
         this.target = target
         this.type = "invalid"
