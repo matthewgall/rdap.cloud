@@ -1,6 +1,6 @@
 {
     "name": "rdap.cloud",
-    "version": "2023.12.0",
+    "version": "2023.12.1",
     "description": "a cloudflare worker for rdap servers",
     "main": "index.js",
     "scripts": {
