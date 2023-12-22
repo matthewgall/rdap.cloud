@@ -1,4 +1,4 @@
-class Rdap {
+export default class Rdap {
     constructor() {
         this.providers = {
             'asn': 'https://data.iana.org/rdap/asn.json',
