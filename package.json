@@ -21,7 +21,7 @@
     },
     "dependencies": {
         "cidr-tools": "^7.0.4",
-        "itty-router": "^4.0.24",
+        "itty-router": "^4.0.25",
         "tld-extract": "^2.1.0",
         "validator": "^13.11.0"
     }
