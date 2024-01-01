@@ -2,6 +2,8 @@ const validator = require('validator');
 const tldextract = require('tld-extract');
 import {contains} from 'cidr-tools';
 import Rdap from './rdap'
+import Package from '../package-lock.json';
+
 class Lookup {
     constructor(target) {
         this.target = target
@@ -12,7 +14,8 @@ class Lookup {
     async fetch(url) {
         let req = await fetch(url, {
             headers: {
-                'Accept': 'application/rdap+json'
+                'Accept': 'application/rdap+json',
+                'User-Agent':  `${Package.name}/${Package.version}`
             },
             cf: {
                 cacheTtl: 84600,
