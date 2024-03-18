@@ -134,10 +134,12 @@ class Lookup {
 
                 try {
                     let socket = connect(srv)
+                    let target = this.target
+                    if (this.metadata.tld.endsWith('.jp')) target = `${target}/e`
 
                     let writer = socket.writable.getWriter()
                     let encoder = new TextEncoder()
-                    let encoded = encoder.encode(this.target + '\r\n')
+                    let encoded = encoder.encode(target + '\r\n')
                     await writer.write(encoded)
 
                     // Now to decode it
