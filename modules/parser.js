@@ -337,8 +337,6 @@ var parseRawData = function (rawData, domain) {
         domainRegex = kgRegex;
     } else if (domain.endsWith('.info')) {
         domainRegex = infoRegex;
-        // } else if (domain.endsWith('.ch') || domain.endsWith('.li')) {
-        //   domainRegex = infoRegex;
     } else if (domain.endsWith('.id')) {
         domainRegex = idRegex;
     } else if (domain.endsWith('.sk')) {
@@ -410,13 +408,9 @@ var parseRawData = function (rawData, domain) {
         result.isAvailable = false;
     }
 
-    // console.log('DEBUG rawData2: "' + rawData + '"');
-    // console.log('result ' + JSON.stringify(result));
-
     // Check to make sure certain fields are set for unknown TLDs to ensure the default pattern matching worked
     // If not then throw TLD not supported error.
     if (unknownTLD) {
-		// console.log('DEBUG: ' + JSON.stringify(result))
         if (!result.isAvailable) {
             if (!result.hasOwnProperty('creationDate') || !result.hasOwnProperty('expirationDate') ||
                 !result.hasOwnProperty('updatedDate') || !result.hasOwnProperty('registrar')) {
