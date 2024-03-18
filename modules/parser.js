@@ -272,6 +272,16 @@ var isRegex = {
 	'notFound': 'No entries found for query'
 };
 
+var itRegex = {
+	'domainName': 'Domain\\.*: *([^\\s]+)',
+	'creationDate': 'Created\\.*: *(.+)',
+	'expirationDate': 'Expire Date\\.*: *(.+)',
+	'updatedDate': 'Last Update: *(.+)',
+	'status': 'Status:\\s*(.+)\\s*\\n',
+	'dateFormat': 'YYYY-MM-DD',
+	'notFound': 'AVAILABLE'
+};
+
 var coRegex = {
     'domainName': 'Domain Name: *([^\\s]+)',
     'registrar': 'Registrar: *(.+)',
@@ -345,6 +355,8 @@ var parseRawData = function (rawData, domain) {
         domainRegex = seRegex;
     } else if (domain.endsWith('.is')) {
         domainRegex = isRegex;
+	} else if (domain.endsWith('.it')) {
+        domainRegex = itRegex;
     } else if (domain.endsWith('.co')) {
         domainRegex = coRegex;
 	} else {
