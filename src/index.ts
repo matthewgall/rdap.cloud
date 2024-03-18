@@ -18,6 +18,7 @@ import { Router } from 'itty-router';
 import Lookup from '../modules/lookup';
 import Rdap from '../modules/rdap';
 import Package from '../package-lock.json';
+import Whois from '../modules/whois';
 
 const router = Router();
 const headers = {
@@ -87,8 +88,9 @@ rdap_keys_expires_total{handler="/metrics",le="86400"} ${expiry['86400']}
 });
 
 router.get('/api/v1/services', async (request, env, context) => {
-    let rdap = new Rdap()
-    let data = await rdap.getServices()
+    let data = new Lookup()
+    data = await data.getServices()
+
     return new Response(JSON.stringify(data, null, 2), headers)
 });
 
@@ -116,9 +118,12 @@ router.get('/api/v1/*', async (request, env, context) => {
 
             if (l.server !== "") {
                 let d = await l.getData()
+
+                // Do some data cleanup
+                delete resp['results'][i]['type']
+                delete resp['results'][i]['server']
+
                 if (d === null || d === "") {
-                    delete resp['results'][i]['type']
-                    delete resp['results'][i]['server']
                     resp['results'][i]['success'] = false
                     resp['results'][i]['message'] = `${i} does not appear to be a registered domain name, IP address or ASN`
                     continue

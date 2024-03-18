@@ -22,6 +22,7 @@
     "dependencies": {
         "cidr-tools": "^9.1.1",
         "itty-router": "^4.2.2",
+        "moment": "^2.30.1",
         "tld-extract": "^2.1.0",
         "validator": "^13.11.0"
     }

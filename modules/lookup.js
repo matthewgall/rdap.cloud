@@ -1,33 +1,35 @@
 const validator = require('validator');
 const tldextract = require('tld-extract');
-import {contains} from 'cidr-tools';
+import { connect } from 'cloudflare:sockets';
+import { containsCidr } from 'cidr-tools';
 import Rdap from './rdap'
+import Whois from './whois';
+import parseRawData from './parser';
 import Package from '../package-lock.json';
 
 class Lookup {
     constructor(target) {
         this.target = target
-        this.type = "invalid"
-        this.server = ""
+        this.type = 'invalid'
+        this.server = ''
     }
 
     async fetch(url) {
         let req = await fetch(url, {
             headers: {
-                'Accept': 'application/rdap+json',
-                'User-Agent':  `${Package.name}/${Package.version}`
+                Accept: 'application/rdap+json',
+                'User-Agent': `${Package.name}/${Package.version}`,
             },
             cf: {
                 cacheTtl: 84600,
-                cacheEverything: true
-            }
+                cacheEverything: true,
+            },
         })
 
         if (req.ok) {
             req = await req.json()
-        }
-        else {
-            req = null;
+        } else {
+            req = null
         }
         return req
     }
@@ -36,20 +38,21 @@ class Lookup {
         if (validator.isIP(this.target)) {
             let classes = ['ipv4', 'ipv6']
 
-            let rd = new Rdap()
-            rd = await rd.getServices()
+            let rd = await this.getServices()
 
-            for (let t of classes) {
-                for (let r in rd[t]) {
-                    if (contains(r, this.target)) {
-                        this.server = rd[t][r]
+            for (let source of Object.keys(rd)) {
+                for (let t of classes) {
+                    for (let r in rd[source][t]) {
+                        if (containsCidr(r, this.target)) {
+                            this.server = rd[source][t][r]
+                        }
                     }
                 }
-            }
-            if (this.server !== "") {
-                this.type = "ip"
-            } else {
-                this.type = "invalid-ip"
+                if (this.server !== '') {
+                    this.type = 'ip'
+                } else {
+                    this.type = 'invalid-ip'
+                }
             }
         }
 
@@ -57,24 +60,25 @@ class Lookup {
             try {
                 let parseRes = tldextract(`http://${this.target}`)
                 this.metadata = {
-                    'subdomains': parseRes.sub,
-                    'domain': parseRes.domain,
-                    'tld': parseRes.tld
+                    subdomains: parseRes.sub,
+                    domain: parseRes.domain,
+                    tld: parseRes.tld,
                 }
 
-                let rd = new Rdap()
-                rd = await rd.getServices()
+                let services = await this.getServices()
 
-                if (rd['domains'][this.metadata['tld']]) {
-                    this.server = rd['domains'][this.metadata['tld']]
-                    this.target = this.metadata['domain']
-                    this.type = "domain"
-                } else {
-                    this.type = "unsupported-domain"
+                for (let source of Object.keys(services)) {
+                    if (services[source]['domains'][this.metadata['tld']]) {
+                        this.server =
+                            services[source]['domains'][this.metadata['tld']]
+                        this.target = this.metadata['domain']
+                        this.type = 'domain'
+                    } else {
+                        this.type = 'unsupported-domain'
+                    }
                 }
-            }
-            catch(e) {
-                this.type = "invalid-domain"
+            } catch (e) {
+                this.type = 'invalid-domain'
             }
         }
 
@@ -89,22 +93,69 @@ class Lookup {
                 }
             }
 
-            if (this.server !== "") {
-                this.type = "asn"
+            if (this.server !== '') {
+                this.type = 'asn'
             } else {
-                this.type = "invalid-asn"
+                this.type = 'invalid-asn'
             }
         }
 
         return this.type
     }
 
+    async getServices() {
+        let rdap = new Rdap()
+        let whois = new Whois()
+
+        let data = {
+            rdap: await rdap.getServices(),
+            whois: await whois.getServices(),
+        }
+        return data
+    }
+
     async getData() {
-        if (this.server !== "") {
-            if (this.type == "asn") {
+        if (this.server !== '') {
+            if (this.type == 'asn') {
                 this.type = 'autnum'
             }
-            let d = await this.fetch(`${this.server}${this.type}/${this.target}`)
+
+            let d = {}
+
+            if (
+                this.server.startsWith('http://') ||
+                this.server.startsWith('https://')
+            )
+                d = await this.fetch(
+                    `${this.server}${this.type}/${this.target}`
+                )
+            if (this.server.startsWith('whois://')) {
+                let srv = {
+                    hostname: this.server.replaceAll('whois://', ''),
+                    port: 43,
+                }
+
+                try {
+                    let socket = connect(srv)
+
+                    let writer = socket.writable.getWriter()
+                    let encoder = new TextEncoder()
+                    let encoded = encoder.encode(this.target + '\r\n')
+                    await writer.write(encoded)
+
+                    // Now to decode it
+                    let data = new Response(socket.readable);
+                    data = await data.text();
+
+                    // And close the socket
+                    socket.close();
+
+                    // And time for a bit of processing
+                    return parseRawData(data, this.target)
+                } catch (e) {
+                    return {}
+                }
+            }
             return d
         } else {
             return {}
