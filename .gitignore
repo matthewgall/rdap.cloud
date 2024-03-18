@@ -1,4 +1,5 @@
 node_modules/
 worker/
 dist/
+.wrangler/
 .cargo-ok
