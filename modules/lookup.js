@@ -68,13 +68,12 @@ class Lookup {
                 let services = await this.getServices()
 
                 for (let source of Object.keys(services)) {
-                    if (services[source]['domains'][this.metadata['tld']]) {
-                        this.server =
-                            services[source]['domains'][this.metadata['tld']]
-                        this.target = this.metadata['domain']
-                        this.type = 'domain'
-                    } else {
-                        this.type = 'unsupported-domain'
+                    if (services[source]['domains'][this.metadata.tld]) {
+                        if (this.server == '') {
+                            this.server = services[source]['domains'][this.metadata.tld]
+                            this.target = this.metadata.domain
+                            this.type = 'domain'
+                        }
                     }
                 }
             } catch (e) {
@@ -122,13 +121,11 @@ class Lookup {
 
             let d = {}
 
-            if (
-                this.server.startsWith('http://') ||
-                this.server.startsWith('https://')
-            )
-                d = await this.fetch(
-                    `${this.server}${this.type}/${this.target}`
-                )
+            if (this.server.startsWith('http://') || this.server.startsWith('https://')) {
+                d = await this.fetch(`${this.server}${this.type}/${this.target}`)
+                return d
+            }
+
             if (this.server.startsWith('whois://')) {
                 let srv = {
                     hostname: this.server.replaceAll('whois://', ''),
@@ -156,7 +153,6 @@ class Lookup {
                     return {}
                 }
             }
-            return d
         } else {
             return {}
         }
