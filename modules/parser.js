@@ -75,8 +75,8 @@ var frRegex = {
 	'domainName': 'domain: *([^\\s]+)',
 	'registrar': 'registrar: *(.+)',
 	'creationDate': 'created: *(.+)',
-	'expirationDate': 'Expir\\w+ Date:\\s?(.+)',
-	'status': 'status: *(.+)',
+	'expirationDate': 'Expiry Date:\\s?(.+)',
+	'status': 'status: *([A-Z]+)',
 	'updatedDate': 'last-update: *(.+)',
 	'notFound': '(No entries found in |%% NOT FOUND)',
 	'dateFormat': 'YYYY-MM-DDThh:mm:ssZ'
