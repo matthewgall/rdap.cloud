@@ -1,4 +1,4 @@
-class Rdap {
+export default class Rdap {
     constructor() {
         this.providers = {
             'asn': 'https://data.iana.org/rdap/asn.json',
@@ -15,8 +15,8 @@ class Rdap {
         this.services = {}
     }
 
-    async fetch(url) {
-        let req = await fetch(url, {
+    async fetch(url: any) {
+        let req: any = await fetch(url, {
             cf: {
                 cacheTtl: 84600,
                 cacheEverything: true
@@ -45,5 +45,3 @@ class Rdap {
         return this.services
     }
 }
-
-module.exports = Rdap
