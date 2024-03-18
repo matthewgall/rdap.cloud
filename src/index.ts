@@ -16,9 +16,7 @@
 
 import { Router } from 'itty-router';
 import Lookup from '../modules/lookup';
-import Rdap from '../modules/rdap';
 import Package from '../package-lock.json';
-import Whois from '../modules/whois';
 
 const router = Router();
 const headers = {
