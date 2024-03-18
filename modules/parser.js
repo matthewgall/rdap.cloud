@@ -101,12 +101,21 @@ var fiRegex = {
 	'dateFormat': 'DD.MM.YYYY hh:mm:ss'
 };
 
+var ptRegex = {
+	'domainName': 'Domain: *([^\\s]+)',
+	'status': 'Domain Status: *(.+)',
+	'creationDate': 'Creation Date\\.*: *([\\S]+)',
+	'expirationDate': 'Expiration Date\\.*: *([\\S]+)',
+	'notFound': 'No Match',
+	'rateLimited': 'maximum number of requests per second exceeded',
+	'dateFormat': 'DD/MM/YYYY hh:mm:ss'
+};
+
 var jpRegex = {
 	'domainName': '\\[Domain Name\\]\\s*([^\\s]+)',
-	'creationDate': '\\[Created on\\]\\s*(.+)',
-	'updatedDate': '\\[Last Updated\\]\\s?(.+)',
-	'expirationDate': '\\[Expires on\\]\\s?(.+)',
-	'status': '\\[Status\\]\\s*(.+)',
+	'creationDate': '\\[Registered Date\\]\\s*(.+)',
+	'updatedDate': '\\[Last Update\\]\\s?(.+)',
+	'status': '\\[State\\]\\s*(.+)',
 	'notFound': 'No match!!',
 	'dateFormat': 'YYYY/MM/DD'
 };
@@ -359,6 +368,8 @@ var parseRawData = function (rawData, domain) {
         domainRegex = itRegex;
     } else if (domain.endsWith('.co')) {
         domainRegex = coRegex;
+    } else if (domain.endsWith('.pt')) {
+        domainRegex = ptRegex;
 	} else {
         domainRegex = defaultRegex;
         unknownTLD = true;
