@@ -152,7 +152,10 @@ class Lookup {
                     // And time for a bit of processing
                     return parseRawData(data, this.target)
                 } catch (e) {
-                    return {}
+                    return {
+                        success: false,
+                        message: e.message
+                    }
                 }
             }
         } else {
