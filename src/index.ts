@@ -121,7 +121,7 @@ router.get('/api/v1/*', async (request, env, context) => {
                 delete resp['results'][i]['type']
                 delete resp['results'][i]['server']
 
-                if (d === null || d === "") {
+                if (d === null || d === "" || d.success === false) {
                     resp['results'][i]['success'] = false
                     resp['results'][i]['message'] = `${i} does not appear to be a registered domain name, IP address or ASN`
                     continue

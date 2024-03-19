@@ -2,7 +2,6 @@ import moment from "moment";
 
 var tlds = {
 	'.com': {
-		'domainName': 'Domain Name: *([^\\s]+)',
 		'registrar': 'Registrar: *(.+)',
 		'updatedDate': 'Updated Date: *(.+)',
 		'creationDate': 'Creation Date: *(.+)',
@@ -11,7 +10,6 @@ var tlds = {
 		'notFound': 'No match for '
 	},
 	'.org': {
-		'domainName': 'Domain Name: *([^\\s]+)',
 		'registrar': 'Registrar: *(.+)',
 		'updatedDate': 'Updated Date: *(.+)',
 		'creationDate': 'Creation Date: *(.+)',
@@ -20,7 +18,6 @@ var tlds = {
 		'notFound': '^(NOT FOUND|Domain not found)'
 	},
 	'.au': {
-		'domainName': 'Domain Name: *([^\\s]+)',
 		'updatedDate': 'Last Modified: *(.+)',
 		'registrar': 'Registrar Name: *(.+)',
 		'status': 'Status: *(.+)',
@@ -28,7 +25,6 @@ var tlds = {
 		'notFound': '^NOT FOUND'
 	},
 	'.us': {
-		'domainName': 'Domain Name: *([^\\s]+)',
 		'registrar': 'Registrar: *(.+)',
 		'status': 'Domain Status: *(.+)',
 		'creationDate': 'Creation Date: *(.+)',
@@ -38,7 +34,6 @@ var tlds = {
 		'dateFormat': 'YYYY-MM-DDThh:mm:ssZ'
 	},
 	'.ru': {
-		'domainName': 'domain: *([^\\s]+)',
 		'registrar': 'registrar: *(.+)',
 		'creationDate': 'created: *(.+)',
 		'expirationDate': 'paid-till: *(.+)',
@@ -46,7 +41,6 @@ var tlds = {
 		'notFound': 'No entries found'
 	},
 	'.uk': {
-		'domainName': 'Domain name:\\s*([^\\s]+)',
 		'registrar': 'Registrar:\\s*(.+)',
 		'status': 'Registration status:\\s*(.+)',
 		'creationDate': 'Registered on:\\s*(.+)',
@@ -56,7 +50,6 @@ var tlds = {
 		'dateFormat': 'DD-MMM-YYYY'
 	},
 	'.fr': {
-		'domainName': 'domain: *([^\\s]+)',
 		'registrar': 'registrar: *(.+)',
 		'creationDate': 'created: *(.+)',
 		'expirationDate': 'Expiry Date:\\s?(.+)',
@@ -66,14 +59,12 @@ var tlds = {
 		'dateFormat': 'YYYY-MM-DDThh:mm:ssZ'
 	},
 	'.nl': {
-		'domainName': 'Domain Name: *([^\\s]+)',
 		'registrar': 'Registrar: *\\s*(.+)',
 		'status': 'Status: *(.+)',
 		'notFound': '\\.nl is free',
 		'rateLimited': 'maximum number of requests per second exceeded'
 	},
 	'.fi': {
-		'domainName': 'domain\\.*: *([\\S]+)',
 		'registrar': 'registrar\\.*: *(.*)',
 		'status': 'status\\.*: *([\\S]+)',
 		'creationDate': 'created\\.*: *([\\S]+)',
@@ -83,16 +74,15 @@ var tlds = {
 		'dateFormat': 'DD.MM.YYYY hh:mm:ss'
 	},
 	'.pt': {
-		'domainName': 'Domain: *([^\\s]+)',
 		'status': 'Domain Status: *(.+)',
 		'creationDate': 'Creation Date\\.*: *([\\S]+)',
 		'expirationDate': 'Expiration Date\\.*: *([\\S]+)',
+		'nameservers': 'Name Server: ([\\S]+)',
 		'notFound': 'No Match',
 		'rateLimited': 'maximum number of requests per second exceeded',
 		'dateFormat': 'DD/MM/YYYY hh:mm:ss'
 	},
 	'.jp': {
-		'domainName': '\\[Domain Name\\]\\s*([^\\s]+)',
 		'creationDate': '\\[Registered Date\\]\\s*(.+)',
 		'updatedDate': '\\[Last Update\\]\\s?(.+)',
 		'status': '\\[State\\]\\s*(.+)',
@@ -100,7 +90,6 @@ var tlds = {
 		'dateFormat': 'YYYY/MM/DD'
 	},
 	'.pl': {
-		'domainName': 'DOMAIN NAME: *([^\\s]+)[\s]+$',
 		'registrar': 'REGISTRAR: *\\s*(.+)',
 		'status': 'Registration status:\\n\\s*(.+)',
 		'creationDate': 'created: *(.+)',
@@ -110,7 +99,6 @@ var tlds = {
 		'dateFormat': 'YYYY.MM.DD hh:mm:ss'
 	},
 	'.br': {
-		'domainName': 'domain: *([^\\s]+)\n',
 		'status': 'status: *(.+)',
 		'creationDate': 'created: *(.+)',
 		'expirationDate': 'expires: *(.+)',
@@ -119,12 +107,10 @@ var tlds = {
 		'notFound': 'No match for '
 	},
 	'.eu': {
-		'domainName': 'Domain: *([^\\n\\r]+)',
 		'registrar': 'Registrar: *\\n *Name: *([^\\n\\r]+)',
 		'notFound': 'Status: AVAILABLE'
 	},
 	'.ee': {
-		'domainName': 'Domain: *[\\n\\r]+\s*name: *([^\\n\\r]+)',
 		'status': 'Domain: *[\\n\\r]+\\s*name: *[^\\n\\r]+\\sstatus: *([^\\n\\r]+)',
 		'creationDate': 'Domain: *[\\n\\r]+\\s*name: *[^\\n\\r]+\\sstatus: *[^\\n\\r]+\\sregistered: *([^\\n\\r]+)',
 		'updatedDate': 'Domain: *[\\n\\r]+\\s*name: *[^\\n\\r]+\\sstatus: *[^\\n\\r]+\\sregistered: *[^\\n\\r]+\\schanged: *([^\\n\\r]+)',
@@ -134,7 +120,6 @@ var tlds = {
 		'dateFormat': 'YYYY-MM-DD'
 	},
 	'.kr': {
-		'domainName': 'Domain Name\\s*: *([^\\s]+)',
 		'creationDate': 'Registered Date\\s*: *(.+)',
 		'updatedDate': 'Last Updated Date\\s*: *(.+)',
 		'expirationDate': 'Expiration Date\\s*: *(.+)',
@@ -143,19 +128,17 @@ var tlds = {
 		'notFound': 'The requested domain was not found '
 	},
 	'.bg': {
-		'domainName': 'DOMAIN NAME: *([^\\s]+)',
 		'status': 'registration status:\\s*(.+)',
 		'notFound': 'registration status: available',
 		'rateLimited': 'Query limit exceeded'
 	},
 	'.de': {
-		'domainName': 'Domain: *([^\\s]+)',
 		'status': 'Status: *(.+)',
 		'updatedDate': 'Changed: *(.+)',
+		'nameservers': 'Nserver: ([\\S]+)',
 		'notFound': 'Status: *free'
 	},
 	'.at': {
-		'domainName': 'domain: *([^\\s]+)',
 		'updatedDate': 'changed: *(.+)',
 		'registrar': 'registrar: *(.+)',
 		'notFound': ' nothing found',
@@ -163,7 +146,6 @@ var tlds = {
 		'rateLimited': 'Quota exceeded'
 	},
 	'.ca': {
-		'domainName': 'Domain Name: *([^\\s]+)',
 		'status': 'Domain Status: *(.+)',
 		'updatedDate': 'Updated Date: *(.+)',
 		'creationDate': 'Creation Date: *(.+)',
@@ -172,7 +154,6 @@ var tlds = {
 		'notFound': 'Not found: '
 	},
 	'.be': {
-		'domainName': 'Domain:\\s*([^\\s]+)',
 		'registrar': 'Registrar: *[\\n\\r]+\\s*Name:\\s*(.+)',
 		'status': 'Status:\\s*(.+)',
 		'creationDate': 'Registered: *(.+)',
@@ -180,7 +161,6 @@ var tlds = {
 		'notFound': 'Status:\\s*AVAILABLE'
 	},
 	'.info': {
-		'domainName': 'Domain Name: *([^\\s]+)',
 		'registrar': 'Registrar: *(.+)',
 		'updatedDate': 'Updated Date: *(.+)',
 		'creationDate': 'Creation Date: *(.+)',
@@ -190,7 +170,6 @@ var tlds = {
 		//'dateFormat':       'YYYY-MM-DDTHH:mm:ssZ'
 	},
 	'.kg': {
-		'domainName': '^Domain\\s*([^\\s]+)',
 		//'registrar': 'Domain support: \\s*(.+)',
 		'creationDate': 'Record created:\\s*(.+)',
 		'expirationDate': 'Record expires on:\\s*(.+)',
@@ -199,7 +178,6 @@ var tlds = {
 		'notFound': 'domain is available for registration'
 	},
 	'.id': {
-		'domainName': 'Domain Name:([^\\s]+)',
 		'creationDate': 'Created On:(.+)',
 		'expirationDate': 'Expiration Date(.+)',
 		'updatedDate': 'Last Updated On(.+)',
@@ -209,7 +187,6 @@ var tlds = {
 		'dateFormat': 'DD-MMM-YYYY HH:mm:ss UTC'
 	},
 	'.sk': {
-		'domainName': 'Domain:\\s*([^\\s]+)',
 		'creationDate': 'Created:\\s*(.+)',
 		'expirationDate': 'Valid Until:\\s*(.+)',
 		'status': 'EPP Status:\\s*(.+)',
@@ -219,7 +196,6 @@ var tlds = {
 		'notFound': 'Domain not found'
 	},
 	'.se': {
-		'domainName': 'domain\\.*: *([^\\s]+)',
 		'creationDate': 'created\\.*: *(.+)',
 		'updatedDate': 'modified\\.*: *(.+)',
 		'expirationDate': 'expires\\.*: *(.+)',
@@ -229,14 +205,12 @@ var tlds = {
 		'notFound': '\\" not found.'
 	},
 	'.is': {
-		'domainName': 'domain\\.*: *([^\\s]+)',
 		'creationDate': 'created\\.*: *(.+)',
 		'expirationDate': 'expires\\.*: *(.+)',
 		'dateFormat': 'MMM DD YYYY',
 		'notFound': 'No entries found for query'
 	},
 	'.it': {
-		'domainName': 'Domain\\.*: *([^\\s]+)',
 		'creationDate': 'Created\\.*: *(.+)',
 		'expirationDate': 'Expire Date\\.*: *(.+)',
 		'updatedDate': 'Last Update: *(.+)',
@@ -245,7 +219,6 @@ var tlds = {
 		'notFound': 'AVAILABLE'
 	},
 	'.co': {
-		'domainName': 'Domain Name: *([^\\s]+)',
 		'registrar': 'Registrar: *(.+)',
 		'updatedDate': 'Updated Date: *(.+)',
 		'creationDate': 'Creation Date: *(.+)',
@@ -254,7 +227,6 @@ var tlds = {
 		'notFound': 'No Data Found'
 	},
 	'default': {
-		'domainName': 'Domain Name: *([^\\s]+)',
 		'registrar': 'Registrar: *(.+)',
 		'updatedDate': 'Updated Date: *(.+)',
 		'creationDate': 'Creat(ed|ion) Date: *(.+)',
@@ -279,9 +251,16 @@ var parseRawData = function (rawData, domain) {
         throw new Error('Bad WHOIS Data: "' + rawData + '"');
     }
 
-    let result: any = {domainName: domain};
+    let result: any = {
+		objectClassName: 'domain',
+		ldhName: domain.toUpperCase(),
+		rdapConformance: [
+			"rdap_level_0",
+			"icann_rdap_technical_implementation_guide_0",
+			"icann_rdap_response_profile_0"
+		]
+	};
 
-    let unknownTLD: any = false;
 	// So first, set a default parser
     let domainRegex: any = tlds['default'];
 	// And identify the ending of the domain we're looking for
@@ -300,14 +279,14 @@ var parseRawData = function (rawData, domain) {
 		domainRegex = tlds[`.${ending[0]}`];
 	}
 	else {
-		unknownTLD = true;
+		throw new Error(`${domain} is not supported by RDAP. This may be because the domain belongs to a ccTLD, or the gTLD has not deployed RDAP`)
 	}
 
     Object.keys(domainRegex).forEach(function (key) {
         // Find multiple matches for status field
 		let regex: any;
 
-        if (key === 'status') {
+        if (['status', 'nameservers'].includes(key)) {
             regex = new RegExp(domainRegex[key], 'g');
         } else {
             regex = new RegExp(domainRegex[key]);
@@ -315,62 +294,65 @@ var parseRawData = function (rawData, domain) {
 
         if (rawData.match(regex) && key !== 'dateFormat') { // dateformat not used for line matching
             if (key === 'rateLimited') {
-                throw new Error('Rate Limited');
+                throw new Error('We were unable to complete the lookup as the server appears to be rate limiting queries');
             } else if (key === 'notFound') {
                 if (!result.hasOwnProperty('isAvailable')) {
-                    result['isAvailable'] = true;
+                    throw new Error(`${domain} does not appear to be a registered domain name, IP address or ASN`)
                 }
             } else {
                 let value = rawData.match(regex)[rawData.match(regex).length - 1];
-                if (key === 'status') {
+                if (['status', 'nameservers'].includes(key)) {
                     let matches: any = [];
                     while (matches = regex.exec(rawData)) {
-                        if (result[key]) {
-                            result[key].push(matches[1]);
-                        } else {
-                            result[key] = [matches[1]];
-                        }
+						if (key == 'nameservers') {
+							if (result[key]) {
+								result[key].push({
+									objectClassName: "nameserver",
+									ldhName: matches[1].toUpperCase()
+								})
+							} else {
+								result[key] = [{
+									objectClassName: "nameserver",
+									ldhName: matches[1].toUpperCase()
+								}];
+							}
+						}
+						else {
+							if (result[key]) {
+								result[key].push(matches[1]);
+							} else {
+								result[key] = [matches[1]];
+							}
+						}
+
                     }
-                } else if (key === 'expirationDate') {
+                } else if (['expirationDate', 'creationDate', 'updatedDate'].includes(key)) {
+					if (!result.events) result.events = []
+
+					let eventMap = {
+						'creationDate': 'registration',
+						'updatedDate': 'last changed',
+						'expirationDate': 'expiration'
+					}
+
                     if (domainRegex.hasOwnProperty('dateFormat')) {
-                        result[key] = moment(value, domainRegex.dateFormat).toJSON();
+                        result.events.push({
+							eventAction: eventMap[key],
+							eventDate: moment(value, domainRegex.dateFormat).toJSON()
+						})
                     } else {
-                        result[key] = moment(value).toJSON();
+						result.events.push({
+							eventAction: eventMap[key],
+							eventDate: moment(value).toJSON()
+						})
                     }
-                } else if (key === 'creationDate') {
-                    if (domainRegex.hasOwnProperty('dateFormat')) {
-                        result[key] = moment(value, domainRegex.dateFormat).toJSON();
-                    } else {
-                        result[key] = moment(value).toJSON();
-                    }
-                } else if (key === 'updatedDate') {
-                    if (domainRegex.hasOwnProperty('dateFormat')) {
-                        result[key] = moment(value, domainRegex.dateFormat).toJSON();
-                    } else {
-                        result[key] = moment(value).toJSON();
-                    }
-                } else if (key === 'domainName') {
-                    result[key] = value.toLowerCase();
                 } else {
                     result[key] = value;
                 }
             }
         }
     });
-    if (!result.hasOwnProperty('isAvailable')) {
-        result.isAvailable = false;
-    }
 
-    // Check to make sure certain fields are set for unknown TLDs to ensure the default pattern matching worked
-    // If not then throw TLD not supported error.
-    if (unknownTLD) {
-        if (!result.isAvailable) {
-            if (!result.hasOwnProperty('creationDate') || !result.hasOwnProperty('expirationDate') ||
-                !result.hasOwnProperty('updatedDate') || !result.hasOwnProperty('registrar')) {
-                throw new Error('TLD not supported');
-            }
-        }
-    }
     return result;
 };
 
