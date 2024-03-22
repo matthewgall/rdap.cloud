@@ -135,7 +135,7 @@ var tlds = {
 	'.de': {
 		'status': 'Status: *(.+)',
 		'updatedDate': 'Changed: *(.+)',
-		'nameservers': 'Nserver: (.+)',
+		'nameservers': 'Nserver: ([\\S]+)',
 		'notFound': 'Status: *free'
 	},
 	'.at': {
