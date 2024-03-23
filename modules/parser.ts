@@ -201,6 +201,7 @@ var tlds = {
 		'expirationDate': 'expires\\.*: *(.+)',
 		'status': 'status\\.*: *(.+)',
 		'registrar': 'registrar: *(.+)',
+		'nameservers': 'nserver: *([\\S]+)',
 		'dateFormat': 'YYYY-MM-DD',
 		'notFound': '\\" not found.'
 	},
