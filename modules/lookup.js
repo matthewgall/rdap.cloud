@@ -135,7 +135,10 @@ class Lookup {
                 try {
                     let socket = connect(srv)
                     let target = this.target
-                    if (this.metadata.tld.endsWith('.jp')) target = `${target}/e`
+
+                    // Have to make some changes to how we query for certain servers
+                    if (this.metadata.tld == 'jp') target = `${target}/e`
+                    if (this.metadata.tld == 'de') target = `${target} -T dn`
 
                     let writer = socket.writable.getWriter()
                     let encoder = new TextEncoder()
