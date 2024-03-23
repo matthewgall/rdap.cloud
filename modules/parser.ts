@@ -31,6 +31,7 @@ var tlds = {
 		'expirationDate': 'Registrar Registration Expiration Date: *(.+)',
 		'updatedDate': 'Updated Date: *(.+)',
 		'notFound': '^No Data Found',
+		'nameservers': 'Name Server: *([\\S]+)',
 		'dateFormat': 'YYYY-MM-DDThh:mm:ssZ'
 	},
 	'.ru': {
