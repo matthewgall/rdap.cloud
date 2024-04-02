@@ -16,13 +16,13 @@
         }
     ],
     "devDependencies": {
-        "@cloudflare/workers-types": "^4.20240320.1",
+        "@cloudflare/workers-types": "^4.20240329.0",
         "prettier": "^3.2.5",
-        "wrangler": "^3.41.0"
+        "wrangler": "^3.43.0"
     },
     "dependencies": {
         "cidr-tools": "^9.1.1",
-        "itty-router": "^5.0.4",
+        "itty-router": "^5.0.5",
         "moment": "^2.30.1",
         "tld-extract": "^2.1.0",
         "validator": "^13.11.0"
