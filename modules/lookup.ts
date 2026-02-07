@@ -65,24 +65,26 @@ export default class Lookup {
 
     async getType() {
         if (validator.isIP(this.target)) {
-            let classes = ['ipv4', 'ipv6']
+            const classes = ['ipv4', 'ipv6']
+            const services = await this.getServices()
+            const rdapServices = services.rdap || {}
 
-            let rd = await this.getServices()
-
-            for (let source of Object.keys(rd)) {
-                for (let t of classes) {
-                    for (let r in rd[source][t]) {
-                        if (containsCidr(r, this.target)) {
-                            this.server = rd[source][t][r]
-                        }
+            for (let t of classes) {
+                const ranges = rdapServices[t] || {}
+                for (let r in ranges) {
+                    if (containsCidr(r, this.target)) {
+                        this.server = ranges[r]
                     }
                 }
-                if (this.server !== '') {
-                    this.type = 'ip'
-                } else {
-                    this.type = 'invalid-ip'
-                }
             }
+
+            if (this.server !== '') {
+                this.type = 'ip'
+            } else {
+                this.type = 'invalid-ip'
+            }
+
+            return this.type
         }
 
         const normalizedTarget = this.target.toLowerCase().startsWith('asn')
