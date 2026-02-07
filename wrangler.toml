@@ -1,20 +1,62 @@
 account_id = "b0d7b9f87b57470ef508f1a511093cae"
 name = "rdapcloud-dev"
 route = "dev.rdap.cloud/*"
-vars = { TTL = 180 }
-kv_namespaces = [{binding = "KV", id = "11bf567208e64657a11fdeb150d2b8b9"}]
 main = "src/index.ts"
-compatibility_date = "2024-03-14"
-node_compat = true
+compatibility_date = "2026-02-01"
+compatibility_flags = ["nodejs_compat"]
+
+kv_namespaces = [
+  { binding = "KV", id = "11bf567208e64657a11fdeb150d2b8b9" }
+]
+
+[vars]
+TTL = 180
+BOOTSTRAP_TTL = 86400
+RATE_LIMIT = 60
+RATE_LIMIT_WINDOW = 60
+
+[assets]
+directory = "assets"
+
+[[durable_objects.bindings]]
+name = "RATE_LIMITER"
+class_name = "RateLimiter"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["RateLimiter"]
+
+# Observability
+[observability]
+enabled = true
 
 [env.staging]
 name = "rdapcloud-staging"
 route = "staging.rdap.cloud/*"
-vars = { TTL = 180 }
-kv_namespaces = [{binding = "KV", id = "11bf567208e64657a11fdeb150d2b8b9"}]
+kv_namespaces = [
+  { binding = "KV", id = "11bf567208e64657a11fdeb150d2b8b9" }
+]
+durable_objects = { bindings = [{ name = "RATE_LIMITER", class_name = "RateLimiter" }] }
+
+[env.staging.vars]
+TTL = 180
+BOOTSTRAP_TTL = 86400
+RATE_LIMIT = 60
+RATE_LIMIT_WINDOW = 60
+
 
 [env.prod]
 name = "rdapcloud-prod"
 route = "rdap.cloud/*"
-vars = { TTL = 604800 }
-kv_namespaces = [{binding = "KV", id = "11bf567208e64657a11fdeb150d2b8b9"}]
+kv_namespaces = [
+  { binding = "KV", id = "11bf567208e64657a11fdeb150d2b8b9" }
+]
+durable_objects = { bindings = [{ name = "RATE_LIMITER", class_name = "RateLimiter" }] }
+
+[env.prod.vars]
+TTL = 604800
+BOOTSTRAP_TTL = 86400
+RATE_LIMIT = 60
+RATE_LIMIT_WINDOW = 60
+
+

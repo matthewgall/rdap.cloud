@@ -1,29 +1,42 @@
-const validator = require('validator');
-const tldextract = require('tld-extract');
-import { connect } from 'cloudflare:sockets';
-import { containsCidr } from 'cidr-tools';
+import validator from 'validator'
+import tldextract from 'tld-extract'
+import { connect } from 'cloudflare:sockets'
+import { containsCidr } from 'cidr-tools'
 import Rdap from './rdap'
-import Whois from './whois';
-import parseRawData from './parser';
-import Package from '../package-lock.json';
+import Whois from './whois'
+import parseRawData from './parser'
+import Package from '../package-lock.json'
 
-class Lookup {
-    constructor(target) {
-        this.target = target
+type DomainMetadata = {
+    subdomains: string
+    domain: string
+    tld: string
+}
+
+export default class Lookup {
+    target: string
+    type: string
+    server: string
+    metadata?: DomainMetadata
+    env?: Env
+
+    constructor(target?: string, env?: Env) {
+        this.target = target || ''
+        this.env = env
         this.type = 'invalid'
         this.server = ''
     }
 
-    async fetch(url) {
+    async fetch(url: string) {
         let req = await fetch(url, {
             headers: {
                 Accept: 'application/rdap+json',
-                'User-Agent': `${Package.name}/${Package.version}`,
+                'User-Agent': `${Package.name}/${Package.version}`
             },
             cf: {
                 cacheTtl: 84600,
-                cacheEverything: true,
-            },
+                cacheEverything: true
+            }
         })
 
         if (req.ok) {
@@ -56,13 +69,40 @@ class Lookup {
             }
         }
 
+        const normalizedTarget = this.target.toLowerCase().startsWith('asn')
+            ? this.target.slice(3)
+            : this.target.toLowerCase().startsWith('as')
+                ? this.target.slice(2)
+                : this.target
+
+        if (validator.isNumeric(normalizedTarget)) {
+            this.target = normalizedTarget
+            const rd = new Rdap(this.env)
+            const services = await rd.getServices()
+
+            for (let r in services['asn']) {
+                let ra = r.split('-')
+                if (this.target >= ra[0] && this.target <= ra[1]) {
+                    this.server = services['asn'][r]
+                }
+            }
+
+            if (this.server !== '') {
+                this.type = 'asn'
+            } else {
+                this.type = 'invalid-asn'
+            }
+
+            return this.type
+        }
+
         if (validator.isFQDN(this.target)) {
             try {
                 let parseRes = tldextract(`http://${this.target}`)
                 this.metadata = {
                     subdomains: parseRes.sub,
                     domain: parseRes.domain,
-                    tld: parseRes.tld,
+                    tld: parseRes.tld
                 }
 
                 let services = await this.getServices()
@@ -81,34 +121,16 @@ class Lookup {
             }
         }
 
-        if (validator.isNumeric(this.target)) {
-            let rd = new Rdap()
-            rd = await rd.getServices()
-
-            for (let r in rd['asn']) {
-                let ra = r.split('-')
-                if (this.target >= ra[0] && this.target <= ra[1]) {
-                    this.server = rd['asn'][r]
-                }
-            }
-
-            if (this.server !== '') {
-                this.type = 'asn'
-            } else {
-                this.type = 'invalid-asn'
-            }
-        }
-
         return this.type
     }
 
     async getServices() {
-        let rdap = new Rdap()
-        let whois = new Whois()
+        let rdap = new Rdap(this.env)
+        let whois = new Whois(this.env)
 
         let data = {
             rdap: await rdap.getServices(),
-            whois: await whois.getServices(),
+            whois: await whois.getServices()
         }
         return data
     }
@@ -129,7 +151,7 @@ class Lookup {
             if (this.server.startsWith('whois://')) {
                 let srv = {
                     hostname: this.server.replaceAll('whois://', ''),
-                    port: 43,
+                    port: 43
                 }
 
                 try {
@@ -137,8 +159,8 @@ class Lookup {
                     let target = this.target
 
                     // Have to make some changes to how we query for certain servers
-                    if (this.metadata.tld == 'jp') target = `${target}/e`
-                    if (this.metadata.tld == 'de') target = `${target} -T dn`
+                    if (this.metadata?.tld == 'jp') target = `${target}/e`
+                    if (this.metadata?.tld == 'de') target = `${target} -T dn`
 
                     let writer = socket.writable.getWriter()
                     let encoder = new TextEncoder()
@@ -146,15 +168,15 @@ class Lookup {
                     await writer.write(encoded)
 
                     // Now to decode it
-                    let data = new Response(socket.readable);
-                    data = await data.text();
+                    const response = new Response(socket.readable)
+                    const rawData = await response.text()
 
                     // And close the socket
-                    socket.close();
+                    socket.close()
 
                     // And time for a bit of processing
-                    return parseRawData(data, this.target)
-                } catch (e) {
+                    return parseRawData(rawData, this.target)
+                } catch (e: any) {
                     return {
                         success: false,
                         message: e.message
@@ -166,5 +188,3 @@ class Lookup {
         }
     }
 }
-
-module.exports = Lookup

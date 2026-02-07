@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="rdap.cloud - A fast, cached RDAP and WHOIS aggregation API for domains, IPs, and ASNs" />
+    <meta name="author" content="rdap.cloud" />
+    <title>rdap.cloud - RDAP + WHOIS Aggregation API</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+    
+    <!-- Modern Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Heroicons for modern icons -->
+    <link rel="stylesheet" href="https://unpkg.com/heroicons@2.0.18/24/outline/style.css">
+    
+    <!-- Custom CSS -->
+    <link href="css/styles.css" rel="stylesheet" />
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav-modern">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="nav-logo">☁️</span>
+                <span class="nav-title">rdap.cloud</span>
+            </div>
+            
+            <div class="nav-links">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#api-test" class="nav-link">Try API</a>
+                <a href="#docs" class="nav-link">Docs</a>
+                <a href="#faq" class="nav-link">FAQ</a>
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                    <span class="theme-toggle-icon">🌙</span>
+                </button>
+            </div>
+            
+            <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-background"></div>
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    RDAP for the whole internet.<br>
+                    <span class="hero-highlight">Fast, cached, and reliable.</span>
+                </h1>
+                <p class="hero-description">
+                    rdap.cloud aggregates RDAP and WHOIS data from authoritative sources, then caches and normalizes
+                    responses so you can ship network intelligence without hammering upstreams.
+                </p>
+                
+                
+                <div class="hero-actions">
+                    <a href="#api-test" class="btn btn-primary">Try API Live</a>
+                    <a href="#docs" class="btn btn-secondary">Read the Docs</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title">Why rdap.cloud?</h2>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Skip the bootstrap plumbing</h3>
+                    <p>No need to download, cache, and refresh IANA bootstrap files yourself. We keep them warm.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🧭</div>
+                    <h3>One endpoint for everything</h3>
+                    <p>Domains, IPs, and ASNs via a single API call. No per-registry wiring or routing logic.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>RDAP-first, WHOIS fallback</h3>
+                    <p>Use modern RDAP wherever possible, with WHOIS only when RDAP isn't available.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📦</div>
+                    <h3>Built-in caching</h3>
+                    <p>Consistent responses and lower latency without maintaining your own cache layer.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Batch lookups</h3>
+                    <p>Query multiple targets in one request by comma-separating inputs.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">💎</div>
+                    <h3>No keys, no setup</h3>
+                    <p>Public API with fair limits. Great for quick scripts, automation, and internal tools.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- API Testing Section -->
+    <section id="api-test" class="api-test">
+        <div class="container">
+            <h2 class="section-title">Test the API</h2>
+            <p class="section-description">Try RDAP lookups in your browser. Enter a domain, IP address, or ASN.</p>
+            
+            <div class="api-demo">
+                <div class="api-input-section">
+                    <div class="input-group">
+                        <input type="text" id="lookupInput" placeholder="example.com" class="api-input">
+                        <button class="btn btn-primary" id="testButton">Run Lookup</button>
+                    </div>
+                    
+                    <div class="api-examples">
+                        <span>Try these examples:</span>
+                        <button class="example-btn" data-query="example.com">example.com</button>
+                        <button class="example-btn" data-query="8.8.8.8">8.8.8.8</button>
+                        <button class="example-btn" data-query="13335">AS13335</button>
+                    </div>
+                </div>
+                
+                <div class="api-results" id="apiResults">
+                    <div class="api-endpoint">
+                        <strong>Endpoint:</strong> <span id="currentEndpoint">GET /api/v1/[subject]</span>
+                    </div>
+                    <div class="api-response" id="apiResponse">
+                        <pre><code>// Enter a target above to see the API response</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Documentation Section -->
+    <section id="docs" class="docs">
+        <div class="container">
+            <h2 class="section-title">API Documentation</h2>
+            
+            <div class="docs-grid">
+                <div class="docs-card">
+                    <h3>Lookup Domain</h3>
+                    <div class="code-block">
+                        <code>GET /api/v1/example.com</code>
+                    </div>
+                    <p>Fetch authoritative RDAP data for a domain name.</p>
+                </div>
+                
+                <div class="docs-card">
+                    <h3>Lookup IP or ASN</h3>
+                    <div class="code-block">
+                        <code>GET /api/v1/8.8.8.8</code>
+                    </div>
+                    <p>Fetch RDAP data for IP addresses or AS numbers.</p>
+                </div>
+                
+                <div class="docs-card">
+                    <h3>Service Catalog</h3>
+                    <div class="code-block">
+                        <code>GET /api/v1/services</code>
+                    </div>
+                    <p>See the aggregated RDAP and WHOIS services used for lookups.</p>
+                </div>
+            </div>
+            
+            <div class="docs-footer">
+                <a href="/api/v1/example.com" class="btn btn-primary">Try a Live Lookup</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="faq">
+        <div class="container">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <h3 class="faq-question">What does rdap.cloud return?</h3>
+                    <p class="faq-answer">
+                        rdap.cloud aggregates RDAP responses from authoritative servers and falls back to WHOIS
+                        only when needed. We normalize responses so they are consistent and predictable.
+                    </p>
+                </div>
+                
+                <div class="faq-item">
+                    <h3 class="faq-question">Does this replace RDAP servers?</h3>
+                    <p class="faq-answer">
+                        No. We proxy and cache responses so you do not have to maintain a full bootstrap client
+                        or repeatedly query upstream servers.
+                    </p>
+                </div>
+                
+                <div class="faq-item">
+                    <h3 class="faq-question">Why is a lookup returning an error?</h3>
+                    <p class="faq-answer">
+                        The target may be invalid or unsupported by RDAP. We include a clear error message in
+                        the response. If you see an issue, open a GitHub issue.
+                    </p>
+                </div>
+                
+                <div class="faq-item">
+                    <h3 class="faq-question">How often are bootstrap files updated?</h3>
+                    <p class="faq-answer">
+                        Bootstrap data is cached and refreshed periodically to stay current while minimizing
+                        upstream traffic.
+                    </p>
+                </div>
+                
+                <div class="faq-item">
+                    <h3 class="faq-question">Is there rate limiting?</h3>
+                    <p class="faq-answer">
+                        Yes. We apply fair rate limits to protect upstreams and keep the service stable.
+                    </p>
+                </div>
+                
+                <div class="faq-item">
+                    <h3 class="faq-question">Can I query multiple targets at once?</h3>
+                    <p class="faq-answer">
+                        Yes. Comma‑separate targets in the URL: <code>/api/v1/example.com,8.8.8.8,13335</code>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <div class="brand-content">
+                        <span class="footer-logo">☁️</span>
+                        <span class="footer-title">rdap.cloud</span>
+                    </div>
+                    <p class="brand-tagline">Fast, cached RDAP and WHOIS aggregation.</p>
+                </div>
+
+                <div class="footer-links">
+                    <h4>Documentation</h4>
+                    <a href="/api/v1/example.com">API Docs</a>
+                    <a href="https://github.com/matthewgall/rdap.cloud/issues/new">Report Issue</a>
+                    <a href="mailto:rdap-support@iocium.com">Contact</a>
+                </div>
+
+                <div class="footer-links">
+                    <h4>More from iocium</h4>
+                    <a href="https://abusedb.cloud" target="_blank" rel="noopener">abusedb.cloud</a>
+                    <a href="https://throwaway.cloud" target="_blank" rel="noopener">throwaway.cloud</a>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; <span id="currentYear"></span> iocium. Open source and free forever.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/scripts.js"></script>
+</body>
+</html>

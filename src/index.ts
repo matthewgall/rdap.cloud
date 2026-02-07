@@ -14,153 +14,32 @@
    limitations under the License. 
 */
 
-import { Router } from 'itty-router';
-import Lookup from '../modules/lookup';
-import Package from '../package-lock.json';
+import { Hono } from 'hono'
+import { createRateLimitMiddleware } from './middleware/rate-limit'
+import { registerApiRoutes } from './routes/api'
+import { registerMetricsRoutes } from './routes/metrics'
+import { registerVersionRoutes } from './routes/version'
 
-const router = Router();
-const headers = {
-    headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, PUT, POST, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Origin, Accept, Content-Type, X-Requested-With, X-CSRF-Token, cf-access-client-id, cf-access-client-secret'
-    }
+const app = new Hono<{ Bindings: Env }>()
+const rateLimitConfig = {
+    limit: 60,
+    windowSeconds: 120
 }
+const rateLimit = createRateLimitMiddleware((env) => ({
+    limit: Number.parseInt(String(env.RATE_LIMIT || rateLimitConfig.limit), 10),
+    windowSeconds: Number.parseInt(String(env.RATE_LIMIT_WINDOW || rateLimitConfig.windowSeconds), 10)
+}))
 
-router.get('/version', (request, env, context) => {
-    return new Response(Package.version, {headers: {'Content-Type': 'text/plain'}});
-})
+registerVersionRoutes(app)
+registerMetricsRoutes(app)
+registerApiRoutes(app, rateLimit)
 
-router.get('/metrics', async (request, env, context) => {
-    let ts = Math.round((new Date()).getTime() / 1000)
-    let count = 0
-    let expiry = {
-        '3600': 0,
-        '21600': 0,
-        '43200': 0,
-        '86400': 0,
-        '172800': 0
-    }
-    let cursor = ''
-    let complete = false
+app.get('/', (c) => c.text('Welcome to rdap.cloud'))
 
-    while (complete !== true) {
-        let data = await env.KV.list({
-            "cursor": cursor
-        })
-        count = count + data['keys'].length
-
-        let delta = 0
-
-        for (let key of data['keys']) {
-            delta = key['expiration'] - ts
-
-            for (let exp in expiry) {
-                if (delta < exp) {
-                    expiry[exp] = expiry[exp] + 1
-                }
-            }
-        }
-
-        complete = data['list_complete']
-        if (complete !== true) {
-            cursor = data.cursor
-        }
-    }
-
-    return new Response(`# HELP rdap_keys_cached_total The total number of cached RDAP lookups
-# TYPE rdap_keys_cached_total counter
-rdap_keys_cached_total ${count}
-# HELP rdap_keys_expires_total The total number of cached RDAP lookups expiring in a set timeframe
-# TYPE rdap_keys_expires_total histogram
-rdap_keys_expires_total{handler="/metrics",le="3600"} ${expiry['3600']}
-rdap_keys_expires_total{handler="/metrics",le="21600"} ${expiry['21600']}
-rdap_keys_expires_total{handler="/metrics",le="43200"} ${expiry['43200']}
-rdap_keys_expires_total{handler="/metrics",le="86400"} ${expiry['86400']}
-`, {
-        headers: {
-            'Content-Type': 'text/plain'
-        }
-    })
-});
-
-router.get('/api/v1/services', async (request, env, context) => {
-    let data = new Lookup()
-    data = await data.getServices()
-
-    return new Response(JSON.stringify(data, null, 2), headers)
-});
-
-router.get('/api/v1/*', async (request, env, context) => {
-    let target = decodeURIComponent(new URL(request.url).pathname.replace('/api/v1/', ''))
-    let resp = {
-        'results': {}
-    }
-
-    for (let i of target.split(',')) {
-        i = i.trim()
-
-        let cached = await env.KV.get(`rdap-${i}`, 'json')
-        if (cached !== null) {
-            resp['results'][i] = cached
-        } else {
-            let l: any = new Lookup(i)
-            let lType: any = await l.getType()
-
-            resp['results'][i] = {
-                'success': true,
-                'type': lType,
-                'server': l.server
-            }
-
-            if (l.server !== "") {
-                let d = await l.getData()
-
-                // Do some data cleanup
-                delete resp['results'][i]['type']
-                delete resp['results'][i]['server']
-
-                if (d === null || d === "" || d.success === false) {
-                    resp['results'][i]['success'] = false
-                    resp['results'][i]['message'] = `${i} does not appear to be a registered domain name, IP address or ASN`
-                    continue
-                }
-                else {
-                    resp['results'][i]['data'] = d
-                }
-            }
-
-            if (['invalid', 'invalid-domain', 'invalid-ip'].includes(resp['results'][i]['type'])) {
-                delete resp['results'][i]['type']
-                delete resp['results'][i]['server']
-                resp['results'][i]['success'] = false
-                resp['results'][i]['message'] = `${i} does not appear to be a valid domain name, IP address or ASN`
-                continue
-            }
-            if (resp['results'][i]['type'] == "unsupported-domain") {
-                delete resp['results'][i]['type']
-                delete resp['results'][i]['server']
-                resp['results'][i]['success'] = false
-                resp['results'][i]['message'] = `${i} is not supported by RDAP. This may be because the domain belongs to a ccTLD, or the gTLD has not deployed RDAP`
-                continue
-            }
-
-            await env.KV.put(`rdap-${i}`, JSON.stringify(resp['results'][i]), {
-                expirationTtl: env.TTL
-            })
-        }
-    }
-
-    return new Response(JSON.stringify(resp, null, 2), headers)
-});
-
-router.get('/', (request, env, context) => {
-    return new Response('Welcome to rdap.cloud');
-})
-
-router.all('*', () => new Response('Not Found.', { status: 404 }))
+app.notFound(() => new Response('Not Found.', { status: 404 }))
 
 export default {
-    fetch: router.fetch
+    fetch: app.fetch
 }
+
+export { RateLimiter } from './rate-limiter'

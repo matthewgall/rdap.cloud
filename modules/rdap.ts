@@ -1,5 +1,16 @@
+import Package from '../package-lock.json'
+
+type RdapProviders = Record<string, string>
+type RdapServices = Record<string, Record<string, string>>
+
 export default class Rdap {
-    constructor() {
+    env?: Env
+    providers: RdapProviders
+    enabled: string[]
+    services: RdapServices
+
+    constructor(env?: Env) {
+        this.env = env
         this.providers = {
             'asn': 'https://data.iana.org/rdap/asn.json',
             'domains': 'https://data.iana.org/rdap/dns.json',
@@ -15,8 +26,11 @@ export default class Rdap {
         this.services = {}
     }
 
-    async fetch(url: any) {
+    async fetch(url: string) {
         let req: any = await fetch(url, {
+            headers: {
+                'User-Agent': `${Package.name}/${Package.version}`
+            },
             cf: {
                 cacheTtl: 84600,
                 cacheEverything: true
@@ -27,7 +41,15 @@ export default class Rdap {
     }
 
     async getServices() {
-        let svc = []
+        const cacheKey = 'bootstrap:rdap'
+        const cacheTtl = this.env?.BOOTSTRAP_TTL || 86400
+
+        if (this.env?.KV) {
+            const cached = await this.env.KV.get(cacheKey, 'json')
+            if (cached) return cached
+        }
+
+        let svc: Array<Promise<any>> = []
         for (let k in this.providers) {
             svc.push(this.fetch(this.providers[k]))
         }
@@ -35,12 +57,18 @@ export default class Rdap {
 
         for (let r in this.enabled) {
             this.services[this.enabled[r]] = {}
-            let d = res[r]['value']
+            let d = (res[r] as PromiseFulfilledResult<any>).value
             for (let p of d['services']) {
                 for (let name of p[0]) {
                     this.services[this.enabled[r]][name] = p[1][0]
                 }
             }
+        }
+
+        if (this.env?.KV) {
+            await this.env.KV.put(cacheKey, JSON.stringify(this.services), {
+                expirationTtl: cacheTtl
+            })
         }
         return this.services
     }
