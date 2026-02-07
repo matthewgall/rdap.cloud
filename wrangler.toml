@@ -18,6 +18,9 @@ RATE_LIMIT_WINDOW = 60
 [assets]
 directory = "assets"
 
+[placement]
+mode = "smart"
+
 [[durable_objects.bindings]]
 name = "RATE_LIMITER"
 class_name = "RateLimiter"
