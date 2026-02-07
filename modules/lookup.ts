@@ -94,14 +94,22 @@ export default class Lookup {
                 : this.target
 
         if (validator.isNumeric(normalizedTarget)) {
-            this.target = normalizedTarget
+            const asn = Number.parseInt(normalizedTarget, 10)
+            if (Number.isNaN(asn)) {
+                this.type = 'invalid-asn'
+                return this.type
+            }
+
+            this.target = String(asn)
             const rd = new Rdap(this.env)
             const services = await rd.getServices()
+            const ranges = services['asn'] || {}
 
-            for (let r in services['asn']) {
-                let ra = r.split('-')
-                if (this.target >= ra[0] && this.target <= ra[1]) {
-                    this.server = services['asn'][r]
+            for (let r in ranges) {
+                const [start, end] = r.split('-').map((value) => Number.parseInt(value, 10))
+                if (Number.isNaN(start) || Number.isNaN(end)) continue
+                if (asn >= start && asn <= end) {
+                    this.server = ranges[r]
                 }
             }
 
