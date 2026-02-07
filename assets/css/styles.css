@@ -451,14 +451,209 @@ section {
     color: var(--text-secondary);
 }
 
-.api-response {
-    background: var(--gray-900);
-    color: var(--gray-100);
-    padding: 1.5rem;
+.api-parsed {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.result-card {
+    background: var(--surface-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+    padding: 1.25rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.result-card.empty-state {
+    text-align: center;
+    padding: 2rem 1.5rem;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(59, 130, 246, 0.04));
+    border: 1px dashed var(--primary-200);
+}
+
+.empty-state-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state-text {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.result-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: var(--font-size-lg);
+}
+
+.result-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.result-pill {
+    font-size: var(--font-size-xs);
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+}
+
+.result-pill.success {
+    border-color: rgba(16, 185, 129, 0.3);
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+}
+
+.result-pill.error {
+    border-color: rgba(220, 38, 38, 0.3);
+    background: rgba(220, 38, 38, 0.1);
+    color: #dc2626;
+}
+
+.result-message {
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+    font-size: var(--font-size-sm);
+}
+
+.result-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.result-field {
+    padding: 0.5rem 0.75rem;
     border-radius: var(--input-radius);
+    border: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.result-field-label {
+    display: block;
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+}
+
+.result-field-value {
+    font-weight: 600;
+    color: var(--text-primary);
+    word-break: break-word;
+}
+
+.entity-list {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.entity-card {
+    border: 1px solid var(--border);
+    border-radius: var(--input-radius);
+    background: var(--surface);
+    padding: 0.75rem 1rem;
+}
+
+.entity-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.entity-title {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.entity-roles {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.entity-details {
+    display: grid;
+    gap: 0.35rem;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.entity-details strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.result-section {
+    border: 1px solid var(--border);
+    border-radius: var(--input-radius);
+    background: var(--surface);
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.result-section summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.result-list {
+    margin-top: 0.75rem;
+    display: grid;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.result-list strong {
+    color: var(--text-primary);
+}
+
+.result-list code {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: var(--font-size-xs);
+}
+
+.result-details {
+    background: var(--surface);
+    border-radius: var(--input-radius);
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    margin-bottom: 0.75rem;
+}
+
+.result-details summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.result-json {
+    margin-top: 0.75rem;
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
     font-size: var(--font-size-sm);
-    overflow-x: auto;
+    white-space: pre-wrap;
+    color: var(--text-secondary);
 }
 
 .api-response pre {
