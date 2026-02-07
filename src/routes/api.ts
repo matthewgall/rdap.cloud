@@ -56,16 +56,10 @@ const getCacheKeyForInput = (target: string) => {
     return null
 }
 
-const getCacheKeyForLookup = (lookup: Lookup) => {
-    if (lookup.type === 'domain') {
-        return `rdap:domain:${lookup.target}`
-    }
-    if (lookup.type === 'ip') {
-        return `rdap:ip:${lookup.target}`
-    }
-    if (lookup.type === 'asn') {
-        return `rdap:asn:${lookup.target}`
-    }
+const getCacheKeyForResolved = (type: string, target: string) => {
+    if (type === 'domain') return `rdap:domain:${target}`
+    if (type === 'ip') return `rdap:ip:${target}`
+    if (type === 'asn') return `rdap:asn:${target}`
     return null
 }
 
@@ -96,6 +90,7 @@ export const registerApiRoutes = (app: Hono<{ Bindings: Env }>, rateLimit: RateL
             } else {
                 let l: any = new Lookup(i, env)
                 let lType: any = await l.getType()
+                const cacheKey = getCacheKeyForResolved(lType, l.target)
 
                 resp['results'][i] = {
                     'success': true,
@@ -135,7 +130,6 @@ export const registerApiRoutes = (app: Hono<{ Bindings: Env }>, rateLimit: RateL
                     continue
                 }
 
-                const cacheKey = getCacheKeyForLookup(l)
                 if (cacheKey) {
                     await env.KV.put(cacheKey, JSON.stringify(resp['results'][i]), {
                         expirationTtl: env.TTL
