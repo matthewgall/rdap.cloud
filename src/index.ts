@@ -16,6 +16,7 @@
 
 import { Hono } from 'hono'
 import { createRateLimitMiddleware } from './middleware/rate-limit'
+import { runScheduledTasks } from './scheduled'
 import { registerApiRoutes } from './routes/api'
 import { registerMetricsRoutes } from './routes/metrics'
 import { registerVersionRoutes } from './routes/version'
@@ -39,7 +40,10 @@ app.get('/', (c) => c.text('Welcome to rdap.cloud'))
 app.notFound(() => new Response('Not Found.', { status: 404 }))
 
 export default {
-    fetch: app.fetch
+    fetch: app.fetch,
+    scheduled: (event, env, ctx) => {
+        ctx.waitUntil(runScheduledTasks(env))
+    }
 }
 
 export { RateLimiter } from './rate-limiter'
