@@ -15,9 +15,16 @@
  */
 
 import Package from '../package-lock.json'
+import { RDAP_HTTP_TLD_ALLOWLIST } from './constants'
 
 type RdapProviders = Record<string, string>
 type RdapServices = Record<string, Record<string, string>>
+
+const getHttpsEndpoint = (endpoints: string[]) =>
+    endpoints.find((endpoint) => endpoint.startsWith('https://')) || null
+
+const getDomainEndpoint = (tld: string, endpoints: string[]) =>
+    getHttpsEndpoint(endpoints) || (RDAP_HTTP_TLD_ALLOWLIST.has(tld) ? endpoints[0] : null)
 
 export default class Rdap {
     env?: Env
@@ -76,7 +83,13 @@ export default class Rdap {
             let d = (res[r] as PromiseFulfilledResult<any>).value
             for (let p of d['services']) {
                 for (let name of p[0]) {
-                    this.services[this.enabled[r]][name] = p[1][0]
+                    const endpoint = this.enabled[r] === 'domains'
+                        ? getDomainEndpoint(name, p[1])
+                        : getHttpsEndpoint(p[1])
+
+                    if (!endpoint) continue
+
+                    this.services[this.enabled[r]][name] = endpoint
                 }
             }
         }

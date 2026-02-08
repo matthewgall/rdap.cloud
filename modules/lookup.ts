@@ -22,6 +22,7 @@ import Rdap from './rdap'
 import Whois from './whois'
 import parseRawData from './parser'
 import Package from '../package-lock.json'
+import { RDAP_HTTP_TLD_ALLOWLIST } from './constants'
 
 type DomainMetadata = {
     subdomains: string
@@ -169,7 +170,11 @@ export default class Lookup {
 
             let d = {}
 
-            if (this.server.startsWith('http://') || this.server.startsWith('https://')) {
+            const allowHttpDomain = this.type === 'domain'
+                && this.metadata?.tld
+                && RDAP_HTTP_TLD_ALLOWLIST.has(this.metadata.tld)
+
+            if (this.server.startsWith('https://') || (allowHttpDomain && this.server.startsWith('http://'))) {
                 d = await this.fetch(`${this.server}${this.type}/${this.target}`)
                 return d
             }
