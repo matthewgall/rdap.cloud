@@ -18,6 +18,7 @@ import { Hono } from 'hono'
 import validator from 'validator'
 import tldextract from 'tld-extract'
 import Lookup from '../../modules/lookup';
+import { MAX_UNIQUE_LOOKUPS } from '../constants'
 import { mergeCorsHeaders } from '../middleware/cors'
 import { withRateLimitHeaders } from '../middleware/rate-limit'
 
@@ -80,7 +81,20 @@ export const registerApiRoutes = (app: Hono<{ Bindings: Env }>, rateLimit: RateL
             'results': {}
         }
 
-        for (let i of target.split(',')) {
+        const targets = target
+            .split(',')
+            .map((item) => item.trim())
+            .filter((item) => item.length > 0)
+        const uniqueTargets = Array.from(new Set(targets))
+
+        if (uniqueTargets.length > MAX_UNIQUE_LOOKUPS) {
+            return c.json({
+                success: false,
+                message: `Too many lookups requested. Max ${MAX_UNIQUE_LOOKUPS} unique targets per request.`
+            }, 400, mergeCorsHeaders(withRateLimitHeaders(c.get('rateLimit'))))
+        }
+
+        for (let i of uniqueTargets) {
             i = i.trim()
 
             const initialCacheKey = getCacheKeyForInput(i)
