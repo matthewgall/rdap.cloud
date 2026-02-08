@@ -100,7 +100,11 @@ export const createRateLimitMiddleware = (getConfig: (env: Env) => RateLimitConf
             c.set('rateLimit', data)
             await next()
         } catch (e) {
-            await next()
+            console.error('rate-limit error', e)
+            return c.json({
+                success: false,
+                message: 'Rate limit service unavailable. Try again later.'
+            }, 429, corsHeaders)
         }
     })
 
