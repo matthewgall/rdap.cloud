@@ -63,11 +63,12 @@ export default class Rdap {
         return req
     }
 
-    async getServices() {
+    async getServices(options: { forceRefresh?: boolean; writeCache?: boolean } = {}) {
+        const { forceRefresh = false, writeCache = true } = options
         const cacheKey = 'bootstrap:rdap'
         const cacheTtl = this.env?.BOOTSTRAP_TTL || 86400
 
-        if (this.env?.KV) {
+        if (!forceRefresh && this.env?.KV) {
             const cached = await this.env.KV.get(cacheKey, 'json')
             if (cached) return cached
         }
@@ -78,8 +79,10 @@ export default class Rdap {
         }
         let res = await Promise.allSettled(svc)
 
+        const services: RdapServices = {}
         for (let r in this.enabled) {
-            this.services[this.enabled[r]] = {}
+            const key = this.enabled[r]
+            services[key] = {}
             let d = (res[r] as PromiseFulfilledResult<any>).value
             for (let p of d['services']) {
                 for (let name of p[0]) {
@@ -89,12 +92,14 @@ export default class Rdap {
 
                     if (!endpoint) continue
 
-                    this.services[this.enabled[r]][name] = endpoint
+                    services[key][name] = endpoint
                 }
             }
         }
 
-        if (this.env?.KV) {
+        this.services = services
+
+        if (this.env?.KV && writeCache) {
             await this.env.KV.put(cacheKey, JSON.stringify(this.services), {
                 expirationTtl: cacheTtl
             })

@@ -42,7 +42,7 @@ app.notFound(() => new Response('Not Found.', { status: 404 }))
 export default {
     fetch: app.fetch,
     scheduled: (event, env, ctx) => {
-        ctx.waitUntil(runScheduledTasks(env))
+        ctx.waitUntil(runScheduledTasks(env, event.cron))
     }
 }
 

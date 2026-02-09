@@ -55,11 +55,12 @@ export default class Whois {
         return req
     }
 
-    async getServices() {
+    async getServices(options: { forceRefresh?: boolean; writeCache?: boolean } = {}) {
+        const { forceRefresh = false, writeCache = true } = options
         const cacheKey = 'bootstrap:whois'
         const cacheTtl = this.env?.BOOTSTRAP_TTL || 86400
 
-        if (this.env?.KV) {
+        if (!forceRefresh && this.env?.KV) {
             const cached = await this.env.KV.get(cacheKey, 'json')
             if (cached) return cached
         }
@@ -70,21 +71,25 @@ export default class Whois {
         }
         let res = await Promise.allSettled(svc)
 
+        const services: WhoisServices = {}
         for (let r in this.enabled) {
-            this.services[this.enabled[r]] = {}
+            const key = this.enabled[r]
+            services[key] = {}
             let d = (res[r] as PromiseFulfilledResult<Record<string, WhoisProviderEntry>>).value
 
             for (let p of Object.keys(d)) {
                 const entry = d[p]
                 if (entry.whoisServer.length > 0 && entry.rdapServers.length == 0) {
                     for (let t of Object.keys(entry.sampleDomains)) {
-                        this.services[this.enabled[r]][t] = `whois://${entry.whoisServer[0]}`
+                        services[key][t] = `whois://${entry.whoisServer[0]}`
                     }
                 }
             }
         }
 
-        if (this.env?.KV) {
+        this.services = services
+
+        if (this.env?.KV && writeCache) {
             await this.env.KV.put(cacheKey, JSON.stringify(this.services), {
                 expirationTtl: cacheTtl
             })
