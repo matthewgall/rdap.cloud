@@ -114,5 +114,4 @@ const cleanupLegacyRdapKeys = async (env: Env) => {
 
 export const runScheduledTasks = async (env: Env) => {
     await updateMetricsCache(env)
-    await cleanupLegacyRdapKeys(env)
 }
