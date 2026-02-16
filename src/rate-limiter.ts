@@ -32,7 +32,6 @@ export class RateLimiter {
         const url = new URL(request.url)
         const limit = Number.parseInt(url.searchParams.get('limit') || '60', 10)
         const windowSeconds = Number.parseInt(url.searchParams.get('window') || '60', 10)
-        const keyName = url.searchParams.get('key')
         const now = Date.now()
         const windowMs = Math.max(windowSeconds, 1) * 1000
 
@@ -51,14 +50,6 @@ export class RateLimiter {
             record.count = record.count + 1
             await this.state.storage.put('record', record)
         }
-
-        const kvKey = `rate-limit:${keyName || this.state.id.toString()}`
-        await this.env.KV.put(kvKey, JSON.stringify({
-            count: record.count,
-            resetAt: record.resetAt
-        }), {
-            expirationTtl: Math.max(windowSeconds, 1)
-        })
 
         const remaining = Math.max(limit - record.count, 0)
         const response = {

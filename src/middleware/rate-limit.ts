@@ -79,7 +79,6 @@ export const createRateLimitMiddleware = (getConfig: (env: Env) => RateLimitConf
             url.pathname = '/limit'
             url.searchParams.set('limit', String(limit))
             url.searchParams.set('window', String(windowSeconds))
-            url.searchParams.set('key', key)
 
             const res = await limiter.fetch(url.toString(), { method: 'POST' })
             const data = await res.json() as RateLimitResponse
