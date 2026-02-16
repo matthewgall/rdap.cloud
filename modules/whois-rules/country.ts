@@ -25,12 +25,6 @@ export const countryTlds: TldPatternMap = {
         status: 'state: *(.+)',
         notFound: 'No entries found'
     },
-    '.nl': {
-        registrar: 'Registrar: *\\s*(.+)',
-        status: 'Status: *(.+)',
-        notFound: '\\.nl is free',
-        rateLimited: 'maximum number of requests per second exceeded'
-    },
     '.fi': {
         registrar: 'registrar\\.*: *(.*)',
         status: 'status\\.*: *([\\S]+)',
