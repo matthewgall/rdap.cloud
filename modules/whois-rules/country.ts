@@ -25,15 +25,6 @@ export const countryTlds: TldPatternMap = {
         status: 'state: *(.+)',
         notFound: 'No entries found'
     },
-    '.uk': {
-        registrar: 'Registrar:\\s*(.+)',
-        status: 'Registration status:\\s*(.+)',
-        creationDate: 'Registered on:\\s*(.+)',
-        expirationDate: 'Expiry date:\\s*(.+)',
-        updatedDate: 'Last updated:\\s*(.+)',
-        notFound: 'No match for ',
-        dateFormat: 'DD-MMM-YYYY'
-    },
     '.fr': {
         registrar: 'registrar: *(.+)',
         creationDate: 'created: *(.+)',
