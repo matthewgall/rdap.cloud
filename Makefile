@@ -1,3 +1,3 @@
 .PHONY: deploy-all
 deploy-all:
-	@wrangler publish && wrangler publish --env staging && wrangler publish --env prod
+	@npx wrangler deploy && npx wrangler deploy --env staging && npx wrangler deploy --env prod
