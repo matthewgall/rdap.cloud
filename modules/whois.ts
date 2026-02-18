@@ -23,12 +23,17 @@ type WhoisProviderEntry = {
     rdapServers: string[]
     sampleDomains: Record<string, string>
 }
+type WhoisBootstrapCache = {
+    services: WhoisServices
+    rdapFallback: Record<string, string>
+}
 
 export default class Whois {
     env?: Env
     providers: WhoisProviders
     enabled: string[]
     services: WhoisServices
+    rdapFallback: Record<string, string>
 
     constructor(env?: Env) {
         this.env = env
@@ -39,6 +44,7 @@ export default class Whois {
             'domains'
         ]
         this.services = {}
+        this.rdapFallback = {}
     }
 
     async fetch(url: string) {
@@ -62,7 +68,17 @@ export default class Whois {
 
         if (!forceRefresh && this.env?.KV) {
             const cached = await this.env.KV.get(cacheKey, 'json')
-            if (cached) return cached
+            if (cached) {
+                if (typeof cached === 'object' && cached !== null && 'services' in cached) {
+                    const cachedPayload = cached as WhoisBootstrapCache
+                    this.services = cachedPayload.services || {}
+                    this.rdapFallback = cachedPayload.rdapFallback || {}
+                    return this.services
+                }
+                this.services = cached as WhoisServices
+                this.rdapFallback = {}
+                return this.services
+            }
         }
 
         let svc: Array<Promise<any>> = []
@@ -72,6 +88,7 @@ export default class Whois {
         let res = await Promise.allSettled(svc)
 
         const services: WhoisServices = {}
+        const rdapFallback: Record<string, string> = {}
         for (let r in this.enabled) {
             const key = this.enabled[r]
             services[key] = {}
@@ -79,6 +96,12 @@ export default class Whois {
 
             for (let p of Object.keys(d)) {
                 const entry = d[p]
+                if (entry.rdapServers.length > 0) {
+                    for (let t of Object.keys(entry.sampleDomains)) {
+                        rdapFallback[t] = entry.rdapServers[0]
+                    }
+                }
+
                 if (entry.whoisServer.length > 0 && entry.rdapServers.length == 0) {
                     for (let t of Object.keys(entry.sampleDomains)) {
                         services[key][t] = `whois://${entry.whoisServer[0]}`
@@ -88,12 +111,20 @@ export default class Whois {
         }
 
         this.services = services
+        this.rdapFallback = rdapFallback
 
         if (this.env?.KV && writeCache) {
-            await this.env.KV.put(cacheKey, JSON.stringify(this.services), {
+            await this.env.KV.put(cacheKey, JSON.stringify({
+                services: this.services,
+                rdapFallback: this.rdapFallback
+            }), {
                 expirationTtl: cacheTtl
             })
         }
         return this.services
+    }
+
+    getRdapFallback() {
+        return this.rdapFallback
     }
 }

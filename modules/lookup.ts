@@ -30,6 +30,11 @@ type DomainMetadata = {
     tld: string
 }
 
+type LookupServices = {
+    rdap: Record<string, Record<string, string>>
+    whois: Record<string, Record<string, string>>
+}
+
 export default class Lookup {
     target: string
     type: string
@@ -133,15 +138,17 @@ export default class Lookup {
                 }
 
                 let services = await this.getServices()
+                const rdapDomains = services.rdap?.domains || {}
+                const whoisDomains = services.whois?.domains || {}
 
-                for (let source of Object.keys(services)) {
-                    if (services[source]['domains'][this.metadata.tld]) {
-                        if (this.server == '') {
-                            this.server = services[source]['domains'][this.metadata.tld]
-                            this.target = this.metadata.domain
-                            this.type = 'domain'
-                        }
-                    }
+                if (rdapDomains[this.metadata.tld]) {
+                    this.server = rdapDomains[this.metadata.tld]
+                    this.target = this.metadata.domain
+                    this.type = 'domain'
+                } else if (whoisDomains[this.metadata.tld]) {
+                    this.server = whoisDomains[this.metadata.tld]
+                    this.target = this.metadata.domain
+                    this.type = 'domain'
                 }
             } catch (e) {
                 this.type = 'invalid-domain'
@@ -151,13 +158,13 @@ export default class Lookup {
         return this.type
     }
 
-    async getServices() {
+    async getServices(): Promise<LookupServices> {
         let rdap = new Rdap(this.env)
         let whois = new Whois(this.env)
 
-        let data = {
-            rdap: await rdap.getServices(),
-            whois: await whois.getServices()
+        let data: LookupServices = {
+            rdap: await rdap.getServices() as Record<string, Record<string, string>>,
+            whois: await whois.getServices() as Record<string, Record<string, string>>
         }
         return data
     }
