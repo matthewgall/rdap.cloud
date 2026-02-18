@@ -25,15 +25,6 @@ export const countryTlds: TldPatternMap = {
         status: 'state: *(.+)',
         notFound: 'No entries found'
     },
-    '.fi': {
-        registrar: 'registrar\\.*: *(.*)',
-        status: 'status\\.*: *([\\S]+)',
-        creationDate: 'created\\.*: *([\\S]+)',
-        updatedDate: 'modified\\.*: *([\\S]+)',
-        expirationDate: 'expires\\.*: *([\\S]+)',
-        notFound: 'Domain not found',
-        dateFormat: 'DD.MM.YYYY hh:mm:ss'
-    },
     '.pt': {
         status: 'Domain Status: *(.+)',
         creationDate: 'Creation Date\\.*: *([\\S]+)',
