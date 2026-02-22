@@ -140,11 +140,11 @@ export const registerApiRoutes = (app: Hono<{ Bindings: Env }>, rateLimit: RateL
                     delete resp['results'][i]['type']
                     delete resp['results'][i]['server']
                     resp['results'][i]['success'] = false
-                    resp['results'][i]['message'] = `${i} is not supported by RDAP. This may be because the domain belongs to a ccTLD, or the gTLD has not deployed RDAP`
+                    resp['results'][i]['message'] = `${i} does not have a WHOIS or RDAP server available for its TLD`
                     continue
                 }
 
-                if (cacheKey) {
+                if (cacheKey && resp['results'][i]['success'] === true) {
                     await env.KV.put(cacheKey, JSON.stringify(resp['results'][i]), {
                         expirationTtl: env.TTL
                     })

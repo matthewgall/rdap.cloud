@@ -33,6 +33,7 @@ type DomainMetadata = {
 type LookupServices = {
     rdap: Record<string, Record<string, string>>
     whois: Record<string, Record<string, string>>
+    rdapFallback: Record<string, string>
 }
 
 export default class Lookup {
@@ -140,6 +141,7 @@ export default class Lookup {
                 let services = await this.getServices()
                 const rdapDomains = services.rdap?.domains || {}
                 const whoisDomains = services.whois?.domains || {}
+                const rdapFallback = services.rdapFallback || {}
 
                 if (rdapDomains[this.metadata.tld]) {
                     this.server = rdapDomains[this.metadata.tld]
@@ -149,6 +151,12 @@ export default class Lookup {
                     this.server = whoisDomains[this.metadata.tld]
                     this.target = this.metadata.domain
                     this.type = 'domain'
+                } else if (rdapFallback[this.metadata.tld]) {
+                    this.server = rdapFallback[this.metadata.tld]
+                    this.target = this.metadata.domain
+                    this.type = 'domain'
+                } else {
+                    this.type = 'unsupported-domain'
                 }
             } catch (e) {
                 this.type = 'invalid-domain'
@@ -164,7 +172,8 @@ export default class Lookup {
 
         let data: LookupServices = {
             rdap: await rdap.getServices() as Record<string, Record<string, string>>,
-            whois: await whois.getServices() as Record<string, Record<string, string>>
+            whois: await whois.getServices() as Record<string, Record<string, string>>,
+            rdapFallback: whois.getRdapFallback() || {}
         }
         return data
     }
