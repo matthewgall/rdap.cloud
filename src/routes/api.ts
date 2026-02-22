@@ -140,7 +140,16 @@ export const registerApiRoutes = (app: Hono<{ Bindings: Env }>, rateLimit: RateL
                     delete resp['results'][i]['type']
                     delete resp['results'][i]['server']
                     resp['results'][i]['success'] = false
-                    resp['results'][i]['message'] = `${i} does not have a WHOIS or RDAP server available for its TLD`
+                    let tld = ''
+                    try {
+                        const parsed = tldextract(`http://${i}`)
+                        if (parsed?.tld) tld = parsed.tld
+                    } catch (e) {
+                        tld = ''
+                    }
+                    resp['results'][i]['message'] = tld
+                        ? `The TLD .${tld} does not have an available WHOIS or RDAP service`
+                        : `The TLD for ${i} does not have an available WHOIS or RDAP service`
                     continue
                 }
 
