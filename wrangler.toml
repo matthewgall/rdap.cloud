@@ -61,5 +61,5 @@ durable_objects = { bindings = [{ name = "RATE_LIMITER", class_name = "RateLimit
 [env.prod.vars]
 TTL = 604800
 BOOTSTRAP_TTL = 86400
-RATE_LIMIT = 60
+RATE_LIMIT = 240
 RATE_LIMIT_WINDOW = 60
