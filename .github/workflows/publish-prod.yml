@@ -16,7 +16,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Publish to Cloudflare
-        uses: cloudflare/wrangler-action@v3.14.1
+        uses: cloudflare/wrangler-action@v3.15.0
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           environment: prod
