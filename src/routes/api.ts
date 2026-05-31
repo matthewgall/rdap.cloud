@@ -17,12 +17,14 @@
 import { Hono } from 'hono'
 import validator from 'validator'
 import tldextract from 'tld-extract'
-import Lookup from '../../modules/lookup';
+import Lookup from '../../modules/lookup'
 import { MAX_UNIQUE_LOOKUPS } from '../constants'
 import { mergeCorsHeaders } from '../middleware/cors'
 import { withRateLimitHeaders } from '../middleware/rate-limit'
 
-type RateLimitMiddleware = ReturnType<typeof import('../middleware/rate-limit').createRateLimitMiddleware>
+type RateLimitMiddleware = ReturnType<
+    typeof import('../middleware/rate-limit').createRateLimitMiddleware
+>
 
 const getCacheKeyForInput = (target: string) => {
     const lowered = target.toLowerCase()
@@ -64,21 +66,38 @@ const getCacheKeyForResolved = (type: string, target: string) => {
     return null
 }
 
-export const registerApiRoutes = (app: Hono<{ Bindings: Env }>, rateLimit: RateLimitMiddleware) => {
+export const registerApiRoutes = (
+    app: Hono<{ Bindings: Env }>,
+    rateLimit: RateLimitMiddleware
+) => {
     app.get('/api/v1/services', rateLimit, async (c) => {
         const env = c.env
         const lookup = new Lookup(undefined, env)
         const data = await lookup.getServices()
 
-        return c.json(data, 200, mergeCorsHeaders(withRateLimitHeaders(c.get('rateLimit'))))
+        return c.json(
+            data,
+            200,
+            mergeCorsHeaders(withRateLimitHeaders(c.get('rateLimit')))
+        )
+    })
+
+    app.get('/api/rdap/domain/:domain', rateLimit, async (c) => {
+        const domain = c.req.param('domain')
+        return c.body(null, 301, {
+            Location: `/api/v1/${encodeURIComponent(domain)}`,
+            ...mergeCorsHeaders(withRateLimitHeaders(c.get('rateLimit'))),
+        })
     })
 
     app.get('/api/v1/*', rateLimit, async (c) => {
         const env = c.env
         const request = c.req.raw
-        let target = decodeURIComponent(new URL(request.url).pathname.replace('/api/v1/', ''))
+        let target = decodeURIComponent(
+            new URL(request.url).pathname.replace('/api/v1/', '')
+        )
         let resp = {
-            'results': {}
+            results: {},
         }
 
         const targets = target
@@ -88,17 +107,23 @@ export const registerApiRoutes = (app: Hono<{ Bindings: Env }>, rateLimit: RateL
         const uniqueTargets = Array.from(new Set(targets))
 
         if (uniqueTargets.length > MAX_UNIQUE_LOOKUPS) {
-            return c.json({
-                success: false,
-                message: `Too many lookups requested. Max ${MAX_UNIQUE_LOOKUPS} unique targets per request.`
-            }, 400, mergeCorsHeaders(withRateLimitHeaders(c.get('rateLimit'))))
+            return c.json(
+                {
+                    success: false,
+                    message: `Too many lookups requested. Max ${MAX_UNIQUE_LOOKUPS} unique targets per request.`,
+                },
+                400,
+                mergeCorsHeaders(withRateLimitHeaders(c.get('rateLimit')))
+            )
         }
 
         for (let i of uniqueTargets) {
             i = i.trim()
 
             const initialCacheKey = getCacheKeyForInput(i)
-            let cached = initialCacheKey ? await env.KV.get(initialCacheKey, 'json') : null
+            let cached = initialCacheKey
+                ? await env.KV.get(initialCacheKey, 'json')
+                : null
             if (cached !== null) {
                 resp['results'][i] = cached
             } else {
@@ -107,36 +132,41 @@ export const registerApiRoutes = (app: Hono<{ Bindings: Env }>, rateLimit: RateL
                 const cacheKey = getCacheKeyForResolved(lType, l.target)
 
                 resp['results'][i] = {
-                    'success': true,
-                    'type': lType,
-                    'server': l.server
+                    success: true,
+                    type: lType,
+                    server: l.server,
                 }
 
-                if (l.server !== "") {
+                if (l.server !== '') {
                     let d = await l.getData()
 
                     // Do some data cleanup
                     delete resp['results'][i]['type']
                     delete resp['results'][i]['server']
 
-                    if (d === null || d === "" || d.success === false) {
+                    if (d === null || d === '' || d.success === false) {
                         resp['results'][i]['success'] = false
-                        resp['results'][i]['message'] = `${i} does not appear to be a registered domain name, IP address or ASN`
+                        resp['results'][i]['message'] =
+                            `${i} does not appear to be a registered domain name, IP address or ASN`
                         continue
-                    }
-                    else {
+                    } else {
                         resp['results'][i]['data'] = d
                     }
                 }
 
-                if (['invalid', 'invalid-domain', 'invalid-ip'].includes(resp['results'][i]['type'])) {
+                if (
+                    ['invalid', 'invalid-domain', 'invalid-ip'].includes(
+                        resp['results'][i]['type']
+                    )
+                ) {
                     delete resp['results'][i]['type']
                     delete resp['results'][i]['server']
                     resp['results'][i]['success'] = false
-                    resp['results'][i]['message'] = `${i} does not appear to be a valid domain name, IP address or ASN`
+                    resp['results'][i]['message'] =
+                        `${i} does not appear to be a valid domain name, IP address or ASN`
                     continue
                 }
-                if (resp['results'][i]['type'] == "unsupported-domain") {
+                if (resp['results'][i]['type'] == 'unsupported-domain') {
                     delete resp['results'][i]['type']
                     delete resp['results'][i]['server']
                     resp['results'][i]['success'] = false
@@ -154,13 +184,21 @@ export const registerApiRoutes = (app: Hono<{ Bindings: Env }>, rateLimit: RateL
                 }
 
                 if (cacheKey && resp['results'][i]['success'] === true) {
-                    await env.KV.put(cacheKey, JSON.stringify(resp['results'][i]), {
-                        expirationTtl: env.TTL
-                    })
+                    await env.KV.put(
+                        cacheKey,
+                        JSON.stringify(resp['results'][i]),
+                        {
+                            expirationTtl: env.TTL,
+                        }
+                    )
                 }
             }
         }
 
-        return c.json(resp, 200, mergeCorsHeaders(withRateLimitHeaders(c.get('rateLimit'))))
+        return c.json(
+            resp,
+            200,
+            mergeCorsHeaders(withRateLimitHeaders(c.get('rateLimit')))
+        )
     })
 }
