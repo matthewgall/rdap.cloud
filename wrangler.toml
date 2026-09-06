@@ -9,7 +9,7 @@ kv_namespaces = [
 ]
 
 [triggers]
-crons = ["*/5 * * * *", "0 3 * * *"]
+crons = ["0 3 * * *"]
 
 [vars]
 TTL = 180

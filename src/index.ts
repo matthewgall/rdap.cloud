@@ -18,7 +18,6 @@ import { Hono } from 'hono'
 import { createRateLimitMiddleware } from './middleware/rate-limit'
 import { runScheduledTasks } from './scheduled'
 import { registerApiRoutes } from './routes/api'
-import { registerMetricsRoutes } from './routes/metrics'
 import { registerVersionRoutes } from './routes/version'
 
 const app = new Hono<{ Bindings: Env }>()
@@ -32,7 +31,6 @@ const rateLimit = createRateLimitMiddleware((env) => ({
 }))
 
 registerVersionRoutes(app)
-registerMetricsRoutes(app)
 registerApiRoutes(app, rateLimit)
 
 app.get('/', (c) => c.text('Welcome to rdap.cloud'))
