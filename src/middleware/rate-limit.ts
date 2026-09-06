@@ -60,12 +60,13 @@ type RateLimitConfig = {
 
 export const createRateLimitMiddleware = (getConfig: (env: Env) => RateLimitConfig) =>
     createMiddleware(async (c, next) => {
+        const env = c.env as Env
+        const request = c.req.raw
+        const config = getConfig(env)
+        const limit = config.limit
+        const windowSeconds = config.windowSeconds
+
         try {
-            const env = c.env as Env
-            const request = c.req.raw
-            const config = getConfig(env)
-            const limit = config.limit
-            const windowSeconds = config.windowSeconds
             const clientIp = getClientIp(request)
             const workerHeader = request.headers.get('cf-worker') || 'unknown'
             const useWorkerHeaderOnly = clientIp === '2a06:98c0:3600::103'
@@ -100,10 +101,17 @@ export const createRateLimitMiddleware = (getConfig: (env: Env) => RateLimitConf
             await next()
         } catch (e) {
             console.error('rate-limit error', e)
-            return c.json({
-                success: false,
-                message: 'Rate limit service unavailable. Try again later.'
-            }, 429, corsHeaders)
+            const now = Date.now()
+            const windowMs = Math.max(windowSeconds, 1) * 1000
+            const fallback: RateLimitResponse = {
+                allowed: true,
+                limit,
+                remaining: limit,
+                resetAt: now + windowMs,
+                retryAfter: 0
+            }
+            c.set('rateLimit', fallback)
+            await next()
         }
     })
 
