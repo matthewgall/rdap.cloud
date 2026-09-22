@@ -18,16 +18,16 @@
         }
     ],
     "devDependencies": {
-        "@types/node": "^26.5.1",
+        "@types/node": "^26.6.1",
         "@types/validator": "^13.15.10",
         "typescript": "^7.0.2",
-        "vitest": "^5.0.0",
-        "wrangler": "^4.131.0"
+        "vitest": "^5.0.1",
+        "wrangler": "^4.134.0"
     },
     "dependencies": {
         "cidr-tools": "^13.0.1",
-        "hono": "^4.13.7",
-        "moment": "^2.30.1",
+        "hono": "^4.13.8",
+        "moment": "^2.31.0",
         "tld-extract": "^2.1.0",
         "validator": "^13.15.35"
     }
